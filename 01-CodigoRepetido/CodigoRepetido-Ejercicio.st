@@ -198,6 +198,21 @@ initialize
 	suspended:= OrderedCollection new.! !
 
 
+!CustomerBook methodsFor: 'abstractions' stamp: 'MB 4/17/2022 15:47:06'!
+removeCustomerNamed: aCustomer FromCollection: aCollection
+	
+	1 to: aCollection size do: 
+	[ :index |
+		aCustomer = (aCollection at: index)
+			ifTrue: [
+				aCollection removeAt: index.
+				^ aCustomer 
+			] 
+	].
+
+	^ NotFound signal.! !
+
+
 !CustomerBook methodsFor: 'customer management' stamp: 'NR 4/3/2019 10:14:26'!
 addCustomerNamed: aName
 
@@ -221,28 +236,13 @@ numberOfSuspendedCustomers
 	
 	^suspended size! !
 
-!CustomerBook methodsFor: 'customer management' stamp: 'NR 4/3/2019 10:14:26'!
+!CustomerBook methodsFor: 'customer management' stamp: 'MB 4/17/2022 15:50:14'!
 removeCustomerNamed: aName 
- 
-	1 to: active size do: 
-	[ :index |
-		aName = (active at: index)
-			ifTrue: [
-				active removeAt: index.
-				^ aName 
-			] 
-	].
 
-	1 to: suspended size do: 	
-	[ :index |
-		aName = (suspended at: index)
-			ifTrue: [
-				suspended removeAt: index.
-				^ aName 
-			] 
-	].
-	
-	^ NotFound signal.
+ 	[^ self removeCustomerNamed: aName FromCollection: active.] 
+		on: NotFound 
+		do: [^self removeCustomerNamed: aName FromCollection: suspended.].
+
 ! !
 
 !CustomerBook methodsFor: 'customer management' stamp: 'HernanWilkinson 7/6/2011 17:52'!
