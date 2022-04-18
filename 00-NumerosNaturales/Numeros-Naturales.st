@@ -1,4 +1,4 @@
-!classDefinition: #I category: 'Numeros-Naturales'!
+!classDefinition: #I category: #'Numeros-Naturales'!
 DenotativeObject subclass: #I
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -7,7 +7,7 @@ DenotativeObject subclass: #I
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'I class' category: 'Numeros-Naturales'!
+!classDefinition: 'I class' category: #'Numeros-Naturales'!
 I class
 	instanceVariableNames: ''!
 
@@ -15,17 +15,6 @@ I class
 next
 
 	^II.! !
-
-
-!I class methodsFor: 'errors' stamp: 'id 4/10/2022 19:21:10'!
-canNotDivideByBiggerNumberErrorDescription
-
-	^ 'A natural number cannot be divided by a greater natural number'.! !
-
-!I class methodsFor: 'errors' stamp: 'id 4/10/2022 19:25:50'!
-negativeNumbersNotSupportedErrorDescription
-
-	^ 'A natural number cannot be subtracted from a smaller natural number'.! !
 
 
 !I class methodsFor: 'operations' stamp: 'id 4/10/2022 22:22:46'!
@@ -54,8 +43,19 @@ subtractFrom: minuend
 
 	^minuend previous.! !
 
+
+!I class methodsFor: 'errors' stamp: 'id 4/10/2022 19:21:10'!
+canNotDivideByBiggerNumberErrorDescription
+
+	^ 'A natural number cannot be divided by a greater natural number'.! !
+
+!I class methodsFor: 'errors' stamp: 'id 4/10/2022 19:25:50'!
+negativeNumbersNotSupportedErrorDescription
+
+	^ 'A natural number cannot be subtracted from a smaller natural number'.! !
+
 
-!classDefinition: #II category: 'Numeros-Naturales'!
+!classDefinition: #II category: #'Numeros-Naturales'!
 DenotativeObject subclass: #II
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -64,7 +64,7 @@ DenotativeObject subclass: #II
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'II class' category: 'Numeros-Naturales'!
+!classDefinition: 'II class' category: #'Numeros-Naturales'!
 II class
 	instanceVariableNames: 'next previous'!
 
@@ -101,6 +101,7 @@ previous
 previous: aNaturalNumber 
 	
 	previous _ aNaturalNumber.! !
+
 
 
 !II class methodsFor: 'errors' stamp: 'id 4/10/2022 19:23:38'!
@@ -153,7 +154,7 @@ subtractFrom: minuend
 	^minuend previous - self previous.! !
 
 
-!II class methodsFor: '--** private fileout/in **--' stamp: 'id 4/10/2022 22:49:44'!
+!II class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
@@ -161,7 +162,7 @@ initializeCollaboratorsFromFile
 	previous := I.! !
 
 
-!classDefinition: #III category: 'Numeros-Naturales'!
+!classDefinition: #III category: #'Numeros-Naturales'!
 II subclass: #III
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -170,11 +171,11 @@ II subclass: #III
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'III class' category: 'Numeros-Naturales'!
+!classDefinition: 'III class' category: #'Numeros-Naturales'!
 III class
 	instanceVariableNames: ''!
 
-!III class methodsFor: '--** private fileout/in **--' stamp: 'id 4/10/2022 22:49:44'!
+!III class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
@@ -182,7 +183,7 @@ initializeCollaboratorsFromFile
 	previous := II.! !
 
 
-!classDefinition: #IV category: 'Numeros-Naturales'!
+!classDefinition: #IV category: #'Numeros-Naturales'!
 II subclass: #IV
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -191,17 +192,369 @@ II subclass: #IV
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'IV class' category: 'Numeros-Naturales'!
+!classDefinition: 'IV class' category: #'Numeros-Naturales'!
 IV class
 	instanceVariableNames: ''!
 
-!IV class methodsFor: '--** private fileout/in **--' stamp: 'id 4/10/2022 22:49:44'!
+!IV class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
 	next := nil.
 	previous := III.! !
 
+
+!classDefinition: #IX category: #'Numeros-Naturales'!
+II subclass: #IX
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'IX class' category: #'Numeros-Naturales'!
+IX class
+	instanceVariableNames: ''!
+
+!IX class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := X.
+	previous := VIII.! !
+
+
+!classDefinition: #V category: #'Numeros-Naturales'!
+II subclass: #V
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'V class' category: #'Numeros-Naturales'!
+V class
+	instanceVariableNames: ''!
+
+!V class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := VI.
+	previous := IV.! !
+
+
+!classDefinition: #VI category: #'Numeros-Naturales'!
+II subclass: #VI
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'VI class' category: #'Numeros-Naturales'!
+VI class
+	instanceVariableNames: ''!
+
+!VI class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := VII.
+	previous := V.! !
+
+
+!classDefinition: #VII category: #'Numeros-Naturales'!
+II subclass: #VII
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'VII class' category: #'Numeros-Naturales'!
+VII class
+	instanceVariableNames: ''!
+
+!VII class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := VIII.
+	previous := VI.! !
+
+
+!classDefinition: #VIII category: #'Numeros-Naturales'!
+II subclass: #VIII
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'VIII class' category: #'Numeros-Naturales'!
+VIII class
+	instanceVariableNames: ''!
+
+!VIII class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := IX.
+	previous := VII.! !
+
+
+!classDefinition: #X category: #'Numeros-Naturales'!
+II subclass: #X
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'X class' category: #'Numeros-Naturales'!
+X class
+	instanceVariableNames: ''!
+
+!X class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XI.
+	previous := IX.! !
+
+
+!classDefinition: #XI category: #'Numeros-Naturales'!
+II subclass: #XI
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XI class' category: #'Numeros-Naturales'!
+XI class
+	instanceVariableNames: ''!
+
+!XI class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XII.
+	previous := X.! !
+
+
+!classDefinition: #XII category: #'Numeros-Naturales'!
+II subclass: #XII
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XII class' category: #'Numeros-Naturales'!
+XII class
+	instanceVariableNames: ''!
+
+!XII class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XIII.
+	previous := XI.! !
+
+
+!classDefinition: #XIII category: #'Numeros-Naturales'!
+II subclass: #XIII
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XIII class' category: #'Numeros-Naturales'!
+XIII class
+	instanceVariableNames: ''!
+
+!XIII class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XIV.
+	previous := XII.! !
+
+
+!classDefinition: #XIV category: #'Numeros-Naturales'!
+II subclass: #XIV
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XIV class' category: #'Numeros-Naturales'!
+XIV class
+	instanceVariableNames: ''!
+
+!XIV class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XV.
+	previous := XIII.! !
+
+
+!classDefinition: #XIX category: #'Numeros-Naturales'!
+II subclass: #XIX
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XIX class' category: #'Numeros-Naturales'!
+XIX class
+	instanceVariableNames: ''!
+
+!XIX class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XX.
+	previous := XVIII.! !
+
+
+!classDefinition: #XV category: #'Numeros-Naturales'!
+II subclass: #XV
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XV class' category: #'Numeros-Naturales'!
+XV class
+	instanceVariableNames: ''!
+
+!XV class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XVI.
+	previous := XIV.! !
+
+
+!classDefinition: #XVI category: #'Numeros-Naturales'!
+II subclass: #XVI
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XVI class' category: #'Numeros-Naturales'!
+XVI class
+	instanceVariableNames: ''!
+
+!XVI class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XVII.
+	previous := XV.! !
+
+
+!classDefinition: #XVII category: #'Numeros-Naturales'!
+II subclass: #XVII
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XVII class' category: #'Numeros-Naturales'!
+XVII class
+	instanceVariableNames: ''!
+
+!XVII class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XVIII.
+	previous := XVI.! !
+
+
+!classDefinition: #XVIII category: #'Numeros-Naturales'!
+II subclass: #XVIII
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XVIII class' category: #'Numeros-Naturales'!
+XVIII class
+	instanceVariableNames: ''!
+
+!XVIII class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := XIX.
+	previous := XVII.! !
+
+
+!classDefinition: #XX category: #'Numeros-Naturales'!
+II subclass: #XX
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numeros-Naturales'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XX class' category: #'Numeros-Naturales'!
+XX class
+	instanceVariableNames: ''!
+
+!XX class methodsFor: '--** private fileout/in **--' stamp: 'MB 4/11/2022 16:02:53'!
+initializeCollaboratorsFromFile
+	"Auto generated method for loading purposes - Do not modify it"
+
+	next := nil.
+	previous := XIX.! !
+
 II initializeAfterFileIn!
 III initializeAfterFileIn!
 IV initializeAfterFileIn!
+IX initializeAfterFileIn!
+V initializeAfterFileIn!
+VI initializeAfterFileIn!
+VII initializeAfterFileIn!
+VIII initializeAfterFileIn!
+X initializeAfterFileIn!
+XI initializeAfterFileIn!
+XII initializeAfterFileIn!
+XIII initializeAfterFileIn!
+XIV initializeAfterFileIn!
+XIX initializeAfterFileIn!
+XV initializeAfterFileIn!
+XVI initializeAfterFileIn!
+XVII initializeAfterFileIn!
+XVIII initializeAfterFileIn!
+XX initializeAfterFileIn!
