@@ -340,6 +340,47 @@ isZero
 
 	self subclassResponsibility ! !
 
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:22'!
+addToEntero: anEnteroBeingAdded
+
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:28'!
+addToFraccion: aFraccionBeingAdded
+	
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:35'!
+divideToEntero: anEnteroBeingDivided
+
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:40'!
+divideToFraccion: aFraccionBeingDivided
+
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:44'!
+multiplyToEntero: anEnteroBeingMultiplied
+
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:48'!
+multiplyToFraccion: aFraccionBeingMultiplied
+
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:52'!
+subtractToEntero: anEnteroBeingSubtracted 
+
+	self subclassResponsibility! !
+
+!Numero methodsFor: 'arithmetic auxiliary' stamp: 'id 4/23/2022 19:32:55'!
+subtractToFraccion: aFraccionBeingSubtracted 
+
+	self subclassResponsibility! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Numero class' category: 'Numero-Exercise'!
