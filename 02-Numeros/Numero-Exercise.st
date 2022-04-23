@@ -462,15 +462,15 @@ subtractToFraccion: aFraccionBeingSubtracted
 	
 ! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'MB 4/23/2022 15:57:20'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'id 4/23/2022 19:58:40'!
 - aSubtrahend 
 
-	^ aSubtrahend subtractToEntero: self.! !
+	^aSubtrahend subtractToEntero: self.! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'MB 4/23/2022 15:22:40'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'id 4/23/2022 19:58:43'!
 / aDivisor 
 	
-	^ aDivisor divideToEntero: self.! !
+	^aDivisor divideToEntero: self.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:55'!
 // aDivisor 
@@ -574,47 +574,20 @@ Numero subclass: #Fraccion
 	
 	^aMultiplier multiplyToFraccion: self.! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'MB 4/22/2022 15:53:38'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'id 4/23/2022 19:59:03'!
 + anAdder 
 	
-	^ anAdder addToFraccion: self.! !
+	^anAdder addToFraccion: self.! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'MB 4/23/2022 16:05:40'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'id 4/23/2022 19:58:05'!
 - aSubtrahend 
 	
-	| newNumerator newDenominator |
-	
-	(aSubtrahend isKindOf: self class) ifTrue: [
-		newNumerator := (numerator * aSubtrahend denominator) - (denominator * aSubtrahend numerator).
-		newDenominator := denominator * aSubtrahend denominator.
-	
-		^newNumerator / newDenominator.
-	].
-	(aSubtrahend isKindOf: Entero) ifTrue: [
-		^ (numerator - (aSubtrahend * denominator)) / denominator.
-	].
-	
-	self invalidNumberType.
-	
-	
-	
-	
-	"
-	(aSubtrahend isKindOf: self class) ifTrue: [	^ self class with: value - aSubtrahend integerValue.].
-	(aSubtrahend isKindOf: Fraccion) ifTrue: [^ ((self * aSubtrahend denominator) - aSubtrahend numerator) / aSubtrahend denominator.].
-	
-	self invalidNumberType.
-	"
-! !
+	^aSubtrahend subtractToFraccion: self.! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'MB 4/23/2022 15:28:18'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'id 4/23/2022 19:55:16'!
 / aDivisor 
 	
-	(aDivisor isKindOf: self class) ifTrue: [^ (numerator * aDivisor denominator) / (denominator * aDivisor numerator)].
-	(aDivisor isKindOf: Entero) ifTrue: [^ numerator / (denominator * aDivisor)].
-	
-	self invalidNumberType.
-	
+	^aDivisor divideToFraccion: self.
 	
 	
 	! !
