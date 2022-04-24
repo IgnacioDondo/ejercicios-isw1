@@ -474,7 +474,7 @@ subtractToFraccion: aFraccionBeingSubtracted
 	
 	^Entero with: value // aDivisor integerValue! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'id 4/24/2022 02:02:31'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'id 4/24/2022 02:37:16'!
 fibonacci
 
 	| one two |
@@ -482,10 +482,7 @@ fibonacci
 	one := Entero with: 1.
 	two := Entero with: 2.
 	
-	self isNegative ifTrue: [self error: Entero negativeFibonacciErrorDescription ].	
-	
-	^ (self - one) fibonacci + (self - two) fibonacci
-		! !
+	^ (self - one) fibonacci + (self - two) fibonacci.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'id 4/24/2022 02:02:10'!
 greatestCommonDivisorWith: anEntero 
@@ -516,10 +513,10 @@ printOn: aStream
 	aStream print: value ! !
 
 
-!Entero methodsFor: 'testing' stamp: 'NR 9/23/2018 22:17:55'!
+!Entero methodsFor: 'testing' stamp: 'id 4/24/2022 02:35:52'!
 isNegative
 	
-	^value < 0! !
+	^false.! !
 
 !Entero methodsFor: 'testing' stamp: 'id 4/24/2022 02:04:27'!
 isOne
@@ -545,20 +542,22 @@ integerValue
 Entero class
 	instanceVariableNames: ''!
 
+!Entero class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:48:33'!
+correspondsTo: aValue
+
+	self subclassResponsibility.! !
+
 !Entero class methodsFor: 'instance creation' stamp: 'NR 4/15/2021 16:42:24'!
 negativeFibonacciErrorDescription
 	^ ' Fibonacci no está definido aquí para Enteros Negativos!!!!!!'! !
 
-!Entero class methodsFor: 'instance creation' stamp: 'id 4/24/2022 01:58:00'!
+!Entero class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:55:41'!
 with: aValue 
 	
 	"Esta verificacion esta puesta por si se equivocan y quieren crear un Entero pasando otra cosa que un Integer - Hernan"
 	aValue isInteger ifFalse: [  self error: 'aValue debe ser anInteger' ].
-	
-	aValue isZero ifTrue: [^ Cero new. ].
-	(aValue = 1) ifTrue: [^ Uno new. ].
-	
-	^self new initalizeWith: aValue! !
+		
+	^(self subclasses detect: [ :anEnteroClass | anEnteroClass correspondsTo: aValue ] ifNone: [^self new initalizeWith: aValue.]) with: aValue.! !
 
 
 !classDefinition: #Cero category: 'Numero-Exercise'!
@@ -602,6 +601,61 @@ isZero
 
 	^true.! !
 
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cero class' category: 'Numero-Exercise'!
+Cero class
+	instanceVariableNames: ''!
+
+!Cero class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:48:55'!
+correspondsTo: aValue
+
+	^aValue isZero.! !
+
+!Cero class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:50:17'!
+with: aValue 
+	
+	^self new.! !
+
+
+!classDefinition: #EnteroNegativo category: 'Numero-Exercise'!
+Entero subclass: #EnteroNegativo
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!EnteroNegativo methodsFor: 'testing' stamp: 'id 4/24/2022 02:35:33'!
+isNegative
+	
+	^true.! !
+
+
+!EnteroNegativo methodsFor: 'arithmetic operations' stamp: 'id 4/24/2022 02:36:40'!
+fibonacci
+
+	self error: Entero negativeFibonacciErrorDescription.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'EnteroNegativo class' category: 'Numero-Exercise'!
+EnteroNegativo class
+	instanceVariableNames: ''!
+
+!EnteroNegativo class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:49:51'!
+correspondsTo: aValue
+
+	^aValue negative.! !
+
+!EnteroNegativo class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:43:47'!
+with: aValue 
+	
+	"Esta verificacion esta puesta por si se equivocan y quieren crear un Entero pasando otra cosa que un Integer - Hernan"
+	aValue isInteger ifFalse: [  self error: 'aValue debe ser anInteger' ].
+	aValue negative ifFalse: [  self error: 'aValue debe ser negativo' ].
+		
+	^self new initalizeWith: aValue.! !
+
 
 !classDefinition: #Uno category: 'Numero-Exercise'!
 Entero subclass: #Uno
@@ -632,6 +686,22 @@ initialize
 isOne
 
 	^true.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Uno class' category: 'Numero-Exercise'!
+Uno class
+	instanceVariableNames: ''!
+
+!Uno class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:49:33'!
+correspondsTo: aValue
+
+	^aValue = 1.! !
+
+!Uno class methodsFor: 'instance creation' stamp: 'id 4/24/2022 02:50:31'!
+with: aValue 
+	
+	^self new.! !
 
 
 !classDefinition: #Fraccion category: 'Numero-Exercise'!
