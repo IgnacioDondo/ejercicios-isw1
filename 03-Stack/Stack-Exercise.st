@@ -139,38 +139,40 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 
 !classDefinition: #SentenceFinderByPrefixTest category: #'Stack-Exercise'!
 TestCase subclass: #SentenceFinderByPrefixTest
-	instanceVariableNames: 'emptyStack emptySet emptyPrefix prefixWithWhitespaces sentenceFinderByPrefix'
+	instanceVariableNames: 'emptyStack emptySet emptyPrefix prefixWithWhitespaces sentenceFinderByPrefix helloPrefix holaPrefix'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!SentenceFinderByPrefixTest methodsFor: 'setup' stamp: 'id 4/27/2022 22:39:09'!
+!SentenceFinderByPrefixTest methodsFor: 'setup' stamp: 'id 4/27/2022 23:37:19'!
 setUp
 
 	emptyStack := OOStack new.
 	emptySet := Set new.
 	
-	emptyPrefix := ''.
-	prefixWithWhitespaces := 'with spaces'.
+	emptyPrefix := Prefix with: ''.
+	prefixWithWhitespaces := Prefix with: 'with spaces'.
+	helloPrefix := Prefix with: 'hello'.
+	holaPrefix := Prefix with: 'hola'.
 	
 	sentenceFinderByPrefix := SentenceFinderByPrefix new.! !
 
 
-!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 22:28:29'!
+!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 23:36:37'!
 test01ReturnsAnEmptySetWhenStackIsEmpty
 
 	self
-		assert: (sentenceFinderByPrefix findSentencesThatArePrefixedWith: 'hello' inStack: emptyStack)
+		assert: (sentenceFinderByPrefix findSentencesThatArePrefixedWith: helloPrefix inStack: emptyStack)
 		equals: emptySet.! !
 
-!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 22:11:08'!
+!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 23:37:29'!
 test02ReturnsAnEmptySetWhenNoSentencesMatchedTheGivenPrefix
 
 	| result stack |
 	
 	stack := self createNewStackAndPush: #('hello world').
 
-	result := sentenceFinderByPrefix findSentencesThatArePrefixedWith: 'hola' inStack: stack.
+	result := sentenceFinderByPrefix findSentencesThatArePrefixedWith: holaPrefix inStack: stack.
 
 	self assert: result equals: emptySet.! !
 
@@ -195,28 +197,28 @@ test05TheSearchIsCaseSensitive
 		shouldSearchingHelloInStackWith: #('hello' 'HELLO')
 		findTheSentences: #('hello').! !
 
-!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 22:31:47'!
+!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/28/2022 00:11:59'!
 test06CanNotSearchForSentencesWhenPrefixIsEmpty
 
 	self
 		shouldSearchingForPrefix: emptyPrefix
-		raiseErrorWithMessage: SentenceFinderByPrefix prefixCanNotBeEmpty.! !
+		raiseErrorWithMessage: Prefix prefixCanNotBeEmpty.! !
 
-!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 22:32:11'!
+!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/28/2022 00:12:02'!
 test07CanNotSearchForSentencesWhenPrefixContainsWhitespaces
 
 	self
 		shouldSearchingForPrefix: prefixWithWhitespaces
-		raiseErrorWithMessage: SentenceFinderByPrefix prefixCanNotContainWhitespaces.! !
+		raiseErrorWithMessage: Prefix prefixCanNotContainWhitespaces.! !
 
-!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 22:40:02'!
+!SentenceFinderByPrefixTest methodsFor: 'tests' stamp: 'id 4/27/2022 23:36:59'!
 test08TheOriginalStackIsNotChangedAfterTheSearchFinishes
 
 	| stack |
 	
 	stack := self createNewStackAndPush: #('hello' 'world').
 
-	sentenceFinderByPrefix findSentencesThatArePrefixedWith: 'hello' inStack: stack.
+	sentenceFinderByPrefix findSentencesThatArePrefixedWith: helloPrefix inStack: stack.
 
 	self assert: stack size equals: 2.
 	self assert: stack pop equals: 'world'.
@@ -257,15 +259,15 @@ shouldSearchingForPrefix: anInvalidPrefix raiseErrorWithMessage: anErrorMessage
 		raise: Error
 		withMessageText: anErrorMessage.! !
 
-!SentenceFinderByPrefixTest methodsFor: 'auxiliary' stamp: 'id 4/27/2022 22:25:27'!
+!SentenceFinderByPrefixTest methodsFor: 'auxiliary' stamp: 'id 4/27/2022 23:37:48'!
 shouldSearchingHelloInStackWith: anOrderedCollectionOfSentencesInStack findTheSentences: anOrderedCollectionOfFoundSentences
 
 	| expectedResult result stack |
-	
+
 	expectedResult := self createNewSetAndAdd: anOrderedCollectionOfFoundSentences.
 	stack := self createNewStackAndPush: anOrderedCollectionOfSentencesInStack.
 
-	result := sentenceFinderByPrefix findSentencesThatArePrefixedWith: 'hello' inStack: stack.
+	result := sentenceFinderByPrefix findSentencesThatArePrefixedWith: helloPrefix inStack: stack.
 
 	self assert: result equals: expectedResult.! !
 
@@ -336,8 +338,16 @@ Object subclass: #Prefix
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!Prefix methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:49:51'!
-with: aString! !
+!Prefix methodsFor: 'initialization' stamp: 'id 4/28/2022 00:04:37'!
+with: aString
+
+	self subclassResponsibility.! !
+
+
+!Prefix methodsFor: 'operations' stamp: 'id 4/27/2022 23:45:01'!
+findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
+
+	self subclassResponsibility.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -345,10 +355,21 @@ with: aString! !
 Prefix class
 	instanceVariableNames: ''!
 
-!Prefix class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:43:55'!
+!Prefix class methodsFor: 'initialization' stamp: 'id 4/27/2022 23:13:48'!
 with: aString
 
 	^(self subclasses detect: [ :aPrefixClass | aPrefixClass correspondsTo: aString ]) with: aString.! !
+
+
+!Prefix class methodsFor: 'errors' stamp: 'id 4/28/2022 00:09:58'!
+prefixCanNotBeEmpty
+
+	^'Prefix cannot be empty!!!!!!'.! !
+
+!Prefix class methodsFor: 'errors' stamp: 'id 4/28/2022 00:10:26'!
+prefixCanNotContainWhitespaces
+
+	^'Prefix cannot contain whitespaces!!!!!!'.! !
 
 
 !classDefinition: #EmptyPrefix category: #'Stack-Exercise'!
@@ -358,18 +379,27 @@ Prefix subclass: #EmptyPrefix
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
+!EmptyPrefix methodsFor: 'initialization' stamp: 'id 4/28/2022 00:04:47'!
+with: aString! !
+
+
+!EmptyPrefix methodsFor: 'operations' stamp: 'id 4/28/2022 00:11:42'!
+findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
+
+	self error: Prefix prefixCanNotBeEmpty.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'EmptyPrefix class' category: #'Stack-Exercise'!
 EmptyPrefix class
 	instanceVariableNames: ''!
 
-!EmptyPrefix class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:44:19'!
+!EmptyPrefix class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:44:19'!
 correspondsTo: aString
 
 	^aString isEmpty.! !
 
-!EmptyPrefix class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:47:47'!
+!EmptyPrefix class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:47:47'!
 with: aString
 
 	^self new.! !
@@ -387,18 +417,24 @@ with: aString
 
 	stringValue := aString.! !
 
+
+!NonEmptyPrefixWithNoWhitespaces methodsFor: 'operations' stamp: 'id 4/28/2022 00:00:12'!
+findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
+
+	^aSentenceFinder safelyFindSentencesThatArePrefixedWith: stringValue inStack: aStack.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'NonEmptyPrefixWithNoWhitespaces class' category: #'Stack-Exercise'!
 NonEmptyPrefixWithNoWhitespaces class
 	instanceVariableNames: ''!
 
-!NonEmptyPrefixWithNoWhitespaces class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:46:55'!
+!NonEmptyPrefixWithNoWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 23:13:26'!
 correspondsTo: aString
 
 	^((aString isEmpty not) and: [(aString includesSubString: ' ') not]).! !
 
-!NonEmptyPrefixWithNoWhitespaces class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:48:23'!
+!NonEmptyPrefixWithNoWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:48:23'!
 with: aString
 
 	^self new with: aString.! !
@@ -411,18 +447,27 @@ Prefix subclass: #NonEmptyPrefixWithWhitespaces
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
+!NonEmptyPrefixWithWhitespaces methodsFor: 'initialization' stamp: 'id 4/28/2022 00:04:52'!
+with: aString! !
+
+
+!NonEmptyPrefixWithWhitespaces methodsFor: 'operations' stamp: 'id 4/28/2022 00:11:53'!
+findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
+
+	self error: Prefix prefixCanNotContainWhitespaces.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'NonEmptyPrefixWithWhitespaces class' category: #'Stack-Exercise'!
 NonEmptyPrefixWithWhitespaces class
 	instanceVariableNames: ''!
 
-!NonEmptyPrefixWithWhitespaces class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:46:33'!
+!NonEmptyPrefixWithWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:46:33'!
 correspondsTo: aString
 
 	^((aString isEmpty not) and: [aString includesSubString: ' ']).! !
 
-!NonEmptyPrefixWithWhitespaces class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 22:48:10'!
+!NonEmptyPrefixWithWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:48:10'!
 with: aString
 
 	^self new.! !
@@ -435,19 +480,15 @@ Object subclass: #SentenceFinderByPrefix
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'id 4/27/2022 21:52:20'!
-assertPrefixIsValid: aPrefix
-
-	aPrefix isEmpty ifTrue: [self error: self class prefixCanNotBeEmpty.].
-
-	(aPrefix includesSubString: ' ') ifTrue: [self error: self class prefixCanNotContainWhitespaces.].! !
-
-!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'id 4/27/2022 22:40:39'!
+!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'id 4/27/2022 23:55:22'!
 findSentencesThatArePrefixedWith: aPrefix inStack: aStack
 
-	| sentencesThatBeginWithGivenPrefix temporaryStack currentSentence |
+	^aPrefix findSentencesThatBeginWithItIn: aStack withFinder: self.! !
 
-	self assertPrefixIsValid: aPrefix.
+!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'id 4/28/2022 00:00:42'!
+safelyFindSentencesThatArePrefixedWith: aValidPrefix inStack: aStack
+
+	| sentencesThatBeginWithGivenPrefix temporaryStack currentSentence |
 
 	sentencesThatBeginWithGivenPrefix := Set new.
 	temporaryStack := OOStack new.
@@ -456,7 +497,7 @@ findSentencesThatArePrefixedWith: aPrefix inStack: aStack
 	[ 
 		currentSentence := aStack pop.
 		temporaryStack push: currentSentence.
-		(currentSentence beginsWith: aPrefix) ifTrue: [sentencesThatBeginWithGivenPrefix add: currentSentence.].
+		(currentSentence beginsWith: aValidPrefix) ifTrue: [sentencesThatBeginWithGivenPrefix add: currentSentence.].
 	].
 
 	[temporaryStack isEmpty not] whileTrue:
@@ -466,22 +507,6 @@ findSentencesThatArePrefixedWith: aPrefix inStack: aStack
 	].
 
 	^sentencesThatBeginWithGivenPrefix.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'SentenceFinderByPrefix class' category: #'Stack-Exercise'!
-SentenceFinderByPrefix class
-	instanceVariableNames: ''!
-
-!SentenceFinderByPrefix class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 21:06:04'!
-prefixCanNotBeEmpty
-
-	^'Prefix cannot be empty!!!!!!'.! !
-
-!SentenceFinderByPrefix class methodsFor: 'as yet unclassified' stamp: 'id 4/27/2022 21:50:59'!
-prefixCanNotContainWhitespaces
-
-	^'Prefix cannot contain whitespaces!!!!!!'.! !
 
 
 !classDefinition: #StackBase category: #'Stack-Exercise'!
@@ -569,7 +594,7 @@ isEmpty
 StackItem class
 	instanceVariableNames: ''!
 
-!StackItem class methodsFor: 'as yet unclassified' stamp: 'MB 4/27/2022 18:52:51'!
+!StackItem class methodsFor: 'initialization' stamp: 'MB 4/27/2022 18:52:51'!
 withItem: anItem previousStackItem: aStackItem size: aSizeInteger
 
 	^self new
