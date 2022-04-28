@@ -1,4 +1,4 @@
-!classDefinition: #OOStackTest category: #'Stack-Exercise'!
+!classDefinition: #OOStackTest category: 'Stack-Exercise'!
 TestCase subclass: #OOStackTest
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -137,23 +137,23 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 ! !
 
 
-!classDefinition: #SentenceFinderByPrefixTest category: #'Stack-Exercise'!
+!classDefinition: #SentenceFinderByPrefixTest category: 'Stack-Exercise'!
 TestCase subclass: #SentenceFinderByPrefixTest
 	instanceVariableNames: 'emptyStack emptySet emptyPrefix prefixWithWhitespaces sentenceFinderByPrefix helloPrefix holaPrefix'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!SentenceFinderByPrefixTest methodsFor: 'setup' stamp: 'id 4/27/2022 23:37:19'!
+!SentenceFinderByPrefixTest methodsFor: 'setup' stamp: 'MB 4/28/2022 15:07:48'!
 setUp
 
 	emptyStack := OOStack new.
 	emptySet := Set new.
 	
-	emptyPrefix := Prefix with: ''.
-	prefixWithWhitespaces := Prefix with: 'with spaces'.
-	helloPrefix := Prefix with: 'hello'.
-	holaPrefix := Prefix with: 'hola'.
+	emptyPrefix := ''.
+	prefixWithWhitespaces := 'with spaces'.
+	helloPrefix := 'hello'.
+	holaPrefix := 'hola'.
 	
 	sentenceFinderByPrefix := SentenceFinderByPrefix new.! !
 
@@ -272,56 +272,56 @@ shouldSearchingHelloInStackWith: anOrderedCollectionOfSentencesInStack findTheSe
 	self assert: result equals: expectedResult.! !
 
 
-!classDefinition: #OOStack category: #'Stack-Exercise'!
+!classDefinition: #OOStack category: 'Stack-Exercise'!
 Object subclass: #OOStack
-	instanceVariableNames: 'stack'
+	instanceVariableNames: 'lastItemOfStack'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!OOStack methodsFor: 'initialization' stamp: 'MB 4/27/2022 18:31:35'!
+!OOStack methodsFor: 'initialization' stamp: 'MB 4/28/2022 15:28:51'!
 initialize
 
-	stack := StackBase new.! !
+	lastItemOfStack := StackBase new.! !
 
 
-!OOStack methodsFor: 'operations' stamp: 'MB 4/27/2022 18:36:26'!
+!OOStack methodsFor: 'operations' stamp: 'MB 4/28/2022 15:28:57'!
 pop
 	
 	| item |
 	item := self top.
-	stack := stack previousStackItem.
+	lastItemOfStack := lastItemOfStack previousStackItem.
 	^item.
 	! !
 
-!OOStack methodsFor: 'operations' stamp: 'MB 4/27/2022 18:38:23'!
+!OOStack methodsFor: 'operations' stamp: 'MB 4/28/2022 15:29:04'!
 push: anObject
 
-	stack := stack push: anObject.
+	lastItemOfStack := lastItemOfStack push: anObject.
 	! !
 
-!OOStack methodsFor: 'operations' stamp: 'MB 4/27/2022 18:31:54'!
+!OOStack methodsFor: 'operations' stamp: 'MB 4/28/2022 15:29:16'!
 size
 	
-	^stack size.
+	^lastItemOfStack size.
 	! !
 
-!OOStack methodsFor: 'operations' stamp: 'MB 4/27/2022 18:32:11'!
+!OOStack methodsFor: 'operations' stamp: 'MB 4/28/2022 15:29:10'!
 top
 	
-	^stack top.
+	^lastItemOfStack top.
 	
 	! !
 
 
-!OOStack methodsFor: 'testing' stamp: 'MB 4/27/2022 18:32:52'!
+!OOStack methodsFor: 'testing' stamp: 'MB 4/28/2022 15:32:25'!
 isEmpty
 
-	^stack isEmpty.! !
+	^lastItemOfStack isEmpty.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'OOStack class' category: #'Stack-Exercise'!
+!classDefinition: 'OOStack class' category: 'Stack-Exercise'!
 OOStack class
 	instanceVariableNames: ''!
 
@@ -331,34 +331,37 @@ stackEmptyErrorDescription
 	^ 'stack is empty!!!!!!'! !
 
 
-!classDefinition: #Prefix category: #'Stack-Exercise'!
+!classDefinition: #Prefix category: 'Stack-Exercise'!
 Object subclass: #Prefix
-	instanceVariableNames: ''
+	instanceVariableNames: 'value'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!Prefix methodsFor: 'initialization' stamp: 'id 4/28/2022 00:04:37'!
-with: aString
+!Prefix methodsFor: 'operations' stamp: 'MB 4/28/2022 15:11:49'!
+value
 
-	self subclassResponsibility.! !
+	^value.! !
 
 
-!Prefix methodsFor: 'operations' stamp: 'id 4/27/2022 23:45:01'!
-findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
+!Prefix methodsFor: 'initialization' stamp: 'MB 4/28/2022 14:59:16'!
+initializeWith: aString
 
-	self subclassResponsibility.! !
+	value := aString.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Prefix class' category: #'Stack-Exercise'!
+!classDefinition: 'Prefix class' category: 'Stack-Exercise'!
 Prefix class
 	instanceVariableNames: ''!
 
-!Prefix class methodsFor: 'initialization' stamp: 'id 4/27/2022 23:13:48'!
+!Prefix class methodsFor: 'initialization' stamp: 'MB 4/28/2022 15:17:30'!
 with: aString
 
-	^(self subclasses detect: [ :aPrefixClass | aPrefixClass correspondsTo: aString ]) with: aString.! !
+	aString isEmpty ifTrue: [ self error: self prefixCanNotBeEmpty. ].
+    	(aString includesSubString: ' ') ifTrue: [ self error: self prefixCanNotContainWhitespaces. ].
+
+	^self new initializeWith: aString.! !
 
 
 !Prefix class methodsFor: 'errors' stamp: 'id 4/28/2022 00:09:58'!
@@ -372,124 +375,19 @@ prefixCanNotContainWhitespaces
 	^'Prefix cannot contain whitespaces!!!!!!'.! !
 
 
-!classDefinition: #EmptyPrefix category: #'Stack-Exercise'!
-Prefix subclass: #EmptyPrefix
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Stack-Exercise'!
-
-!EmptyPrefix methodsFor: 'initialization' stamp: 'id 4/28/2022 00:04:47'!
-with: aString! !
-
-
-!EmptyPrefix methodsFor: 'operations' stamp: 'id 4/28/2022 00:11:42'!
-findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
-
-	self error: Prefix prefixCanNotBeEmpty.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'EmptyPrefix class' category: #'Stack-Exercise'!
-EmptyPrefix class
-	instanceVariableNames: ''!
-
-!EmptyPrefix class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:44:19'!
-correspondsTo: aString
-
-	^aString isEmpty.! !
-
-!EmptyPrefix class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:47:47'!
-with: aString
-
-	^self new.! !
-
-
-!classDefinition: #NonEmptyPrefixWithNoWhitespaces category: #'Stack-Exercise'!
-Prefix subclass: #NonEmptyPrefixWithNoWhitespaces
-	instanceVariableNames: 'stringValue'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Stack-Exercise'!
-
-!NonEmptyPrefixWithNoWhitespaces methodsFor: 'initialization' stamp: 'id 4/27/2022 22:48:40'!
-with: aString
-
-	stringValue := aString.! !
-
-
-!NonEmptyPrefixWithNoWhitespaces methodsFor: 'operations' stamp: 'id 4/28/2022 00:00:12'!
-findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
-
-	^aSentenceFinder safelyFindSentencesThatArePrefixedWith: stringValue inStack: aStack.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'NonEmptyPrefixWithNoWhitespaces class' category: #'Stack-Exercise'!
-NonEmptyPrefixWithNoWhitespaces class
-	instanceVariableNames: ''!
-
-!NonEmptyPrefixWithNoWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 23:13:26'!
-correspondsTo: aString
-
-	^((aString isEmpty not) and: [(aString includesSubString: ' ') not]).! !
-
-!NonEmptyPrefixWithNoWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:48:23'!
-with: aString
-
-	^self new with: aString.! !
-
-
-!classDefinition: #NonEmptyPrefixWithWhitespaces category: #'Stack-Exercise'!
-Prefix subclass: #NonEmptyPrefixWithWhitespaces
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Stack-Exercise'!
-
-!NonEmptyPrefixWithWhitespaces methodsFor: 'initialization' stamp: 'id 4/28/2022 00:04:52'!
-with: aString! !
-
-
-!NonEmptyPrefixWithWhitespaces methodsFor: 'operations' stamp: 'id 4/28/2022 00:11:53'!
-findSentencesThatBeginWithItIn: aStack withFinder: aSentenceFinder
-
-	self error: Prefix prefixCanNotContainWhitespaces.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'NonEmptyPrefixWithWhitespaces class' category: #'Stack-Exercise'!
-NonEmptyPrefixWithWhitespaces class
-	instanceVariableNames: ''!
-
-!NonEmptyPrefixWithWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:46:33'!
-correspondsTo: aString
-
-	^((aString isEmpty not) and: [aString includesSubString: ' ']).! !
-
-!NonEmptyPrefixWithWhitespaces class methodsFor: 'initialization' stamp: 'id 4/27/2022 22:48:10'!
-with: aString
-
-	^self new.! !
-
-
-!classDefinition: #SentenceFinderByPrefix category: #'Stack-Exercise'!
+!classDefinition: #SentenceFinderByPrefix category: 'Stack-Exercise'!
 Object subclass: #SentenceFinderByPrefix
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'id 4/27/2022 23:55:22'!
-findSentencesThatArePrefixedWith: aPrefix inStack: aStack
+!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'MB 4/28/2022 15:11:22'!
+findSentencesThatArePrefixedWith: aStringBeingAPrefix inStack: aStack
 
-	^aPrefix findSentencesThatBeginWithItIn: aStack withFinder: self.! !
+	| prefix sentencesThatBeginWithGivenPrefix temporaryStack currentSentence |
 
-!SentenceFinderByPrefix methodsFor: 'operations' stamp: 'id 4/28/2022 00:00:42'!
-safelyFindSentencesThatArePrefixedWith: aValidPrefix inStack: aStack
-
-	| sentencesThatBeginWithGivenPrefix temporaryStack currentSentence |
-
+	prefix := Prefix with: aStringBeingAPrefix.
 	sentencesThatBeginWithGivenPrefix := Set new.
 	temporaryStack := OOStack new.
 
@@ -497,7 +395,7 @@ safelyFindSentencesThatArePrefixedWith: aValidPrefix inStack: aStack
 	[ 
 		currentSentence := aStack pop.
 		temporaryStack push: currentSentence.
-		(currentSentence beginsWith: aValidPrefix) ifTrue: [sentencesThatBeginWithGivenPrefix add: currentSentence.].
+		(currentSentence beginsWith: prefix value) ifTrue: [sentencesThatBeginWithGivenPrefix add: currentSentence.].
 	].
 
 	[temporaryStack isEmpty not] whileTrue:
@@ -509,7 +407,7 @@ safelyFindSentencesThatArePrefixedWith: aValidPrefix inStack: aStack
 	^sentencesThatBeginWithGivenPrefix.! !
 
 
-!classDefinition: #StackBase category: #'Stack-Exercise'!
+!classDefinition: #StackBase category: 'Stack-Exercise'!
 Object subclass: #StackBase
 	instanceVariableNames: 'size'
 	classVariableNames: ''
@@ -547,7 +445,7 @@ isEmpty
 	^true.! !
 
 
-!classDefinition: #StackItem category: #'Stack-Exercise'!
+!classDefinition: #StackItem category: 'Stack-Exercise'!
 Object subclass: #StackItem
 	instanceVariableNames: 'item previousStackItem size'
 	classVariableNames: ''
@@ -590,7 +488,7 @@ isEmpty
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'StackItem class' category: #'Stack-Exercise'!
+!classDefinition: 'StackItem class' category: 'Stack-Exercise'!
 StackItem class
 	instanceVariableNames: ''!
 
