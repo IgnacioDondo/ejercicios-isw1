@@ -241,6 +241,50 @@ test22PortfolioWithTwoPortfolioNestedWithAccountCannotAddTheSameAccount
 	self addingAccountToPortfolioShouldRaiseDuplicatedRegistryError.
 ! !
 
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 15:38:03'!
+test23PortfolioWithAccountCannotBeAddedToAPortfolioThatAlreadyHasThatAccount
+	
+	portfolio addRegistry: account.
+	portfolio2 addRegistry: account.
+	
+	self
+		should: [ portfolio addRegistry: portfolio2. ]
+		raise: Error
+		withMessageText: Portfolio duplicatedRegistryErrorDescription.
+	
+	self assert: 1 equals: portfolio quantityOfRegistries.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 15:49:23'!
+test24PortfolioWithPorfolioWithAccountCannotAddAPortfolioThatAlreadyHasThatAccount
+	
+	portfolio addRegistry: portfolio2.
+	portfolio2 addRegistry: account.
+	portfolio3 addRegistry: account.
+	
+	self
+		should: [ portfolio addRegistry: portfolio3. ]
+		raise: Error
+		withMessageText: Portfolio duplicatedRegistryErrorDescription.
+	
+	self assert: 1 equals: portfolio quantityOfRegistries.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 16:07:30'!
+test25PortfolioWithPorfolioCannotAddAPortfolioThatIsAlreadyInTheSecondPortfolio
+	
+	portfolio addRegistry: portfolio2.
+	
+	portfolio2 addRegistry: portfolio3.
+	
+	self
+		should: [ portfolio addRegistry: portfolio3. ]
+		raise: Error
+		withMessageText: Portfolio duplicatedRegistryErrorDescription.
+	
+	self assert: 1 equals: portfolio quantityOfRegistries.
+! !
+
 
 !PortfolioTest methodsFor: 'setup' stamp: 'MYB 5/21/2022 18:21:48'!
 setUp 
@@ -536,25 +580,36 @@ initialize
 	registries := Set new.! !
 
 
-!Portfolio methodsFor: 'modifying' stamp: 'MYB 5/22/2022 00:49:07'!
+!Portfolio methodsFor: 'modifying' stamp: 'MYB 5/22/2022 16:00:45'!
 addRegistry: aRegistry
 
 	self hasRegistryInside: aRegistry.
+	aRegistry hasRegistryInside: self.
+	
+	self hasItsRegistriesInside: aRegistry.
 
 	registries add: aRegistry.! !
 
+
+!Portfolio methodsFor: 'testing' stamp: 'MYB 5/22/2022 16:00:45'!
+hasItsRegistriesInside: aRegistry
+
+	^ registries do: [ :registry | 
+		aRegistry hasRegistryInside: registry.
+	]! !
 
 !Portfolio methodsFor: 'testing' stamp: 'MYB 5/21/2022 17:54:03'!
 hasRegistered: aTransaction
 	
 	^(registries anySatisfy: [:registry | registry hasRegistered: aTransaction])! !
 
-!Portfolio methodsFor: 'testing' stamp: 'MYB 5/22/2022 00:49:07'!
+!Portfolio methodsFor: 'testing' stamp: 'MYB 5/22/2022 15:56:47'!
 hasRegistryInside: aRegistry
 	
 	registries do: [ :registry | 
 		aRegistry assertCanBeAddedInConjunctionWith: registry.
 		registry hasRegistryInside: aRegistry.
+		aRegistry hasRegistryInside: registry.
 	].! !
 
 
