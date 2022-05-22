@@ -1,185 +1,267 @@
 !classDefinition: #PortfolioTest category: 'Portfolio-Ejercicio'!
 TestCase subclass: #PortfolioTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'portfolio account portfolio2 account2 portfolio3'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:11:51'!
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:05:39'!
 test01PortfolioHaveZeroAsBalanceWhenCreated 
-
-	| portfolio |
-	
-	portfolio := Portfolio new.
 
 	self assert: 0 equals: portfolio balance.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:18:14'!
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:12:10'!
 test02PortfolioCanAddOneAccount
-
-	| portfolio account |
 	
-	portfolio := Portfolio new.
-	account := ReceptiveAccount new.
-	
-	portfolio addReceptiveAccount: account.
+	portfolio addRegistry: account.
 
-	self assert: 1 equals: portfolio quantityOfAccounts.
+	self assert: 1 equals: portfolio quantityOfRegistries.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:20:08'!
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:19:02'!
 test03PortfolioCanAddTwoAccounts
-
-	| portfolio account1 account2 |
 	
-	portfolio := Portfolio new.
-	account1 := ReceptiveAccount new.
-	account2 := ReceptiveAccount new.
-	
-	portfolio addReceptiveAccount: account1.
-	portfolio addReceptiveAccount: account2.
+	portfolio addRegistry: account.
+	portfolio addRegistry: account2.
 
-	self assert: 2 equals: portfolio quantityOfAccounts.
+	self assert: 2 equals: portfolio quantityOfRegistries.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:27:43'!
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:12:10'!
 test04PortfolioIncresesBalanceWhenAddingAnAccountWithDeposit
-
-	| portfolio account |
 	
-	portfolio := Portfolio new.
-	account := ReceptiveAccount new.
-	
-	portfolio addReceptiveAccount: account.
+	portfolio addRegistry: account.
 	Deposit register: 100 on: account. 
 
 	self assert: 100 equals: portfolio balance.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:30:56'!
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:12:10'!
 test05PortfolioIncresesAndDecreasesBalanceWhenAddingAnAccountWithDepositAndWithdraw
-
-	| portfolio account |
 	
-	portfolio := Portfolio new.
-	account := ReceptiveAccount new.
-	
-	portfolio addReceptiveAccount: account.
+	portfolio addRegistry: account.
 	Deposit register: 100 on: account. 
 	Withdraw register: 50 on: account. 
 
 	self assert: 50 equals: portfolio balance.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:34:50'!
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:19:15'!
 test06PortfolioIncresesAndDecreasesBalanceWhenAddingManyAccounts
-
-	| portfolio account1 account2 |
 	
-	portfolio := Portfolio new.
-	account1 := ReceptiveAccount new.
-	account2 := ReceptiveAccount new.
+	portfolio addRegistry: account.
+	portfolio addRegistry: account2.
 	
-	portfolio addReceptiveAccount: account1.
-	portfolio addReceptiveAccount: account2.
-	
-	Deposit register: 100 on: account1. 
-	Withdraw register: 50 on: account1. 
-	
-	Deposit register: 250 on: account2. 
-	Withdraw register: 100 on: account2. 
-
-	self assert: 200 equals: portfolio balance.
-! !
-
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:39:37'!
-test07PortfolioCanAddOnePortfolio
-
-	| portfolio portfolioInside |
-	
-	portfolio := Portfolio new.
-	portfolioInside := Portfolio new.
-	
-	portfolio addPortfolio: portfolioInside.
-
-	self assert: 1 equals: portfolio quantityOfPortfolios.
-! !
-
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:40:56'!
-test08PortfolioCanAddTwoPortfolio
-
-	| portfolio portfolioInside1 portfolioInside2 |
-	
-	portfolio := Portfolio new.
-	portfolioInside1 := Portfolio new.
-	portfolioInside2 := Portfolio new.
-	
-	portfolio addPortfolio: portfolioInside1.
-	portfolio addPortfolio: portfolioInside2.
-	
-	self assert: 2 equals: portfolio quantityOfPortfolios.
-! !
-
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:44:51'!
-test09PortfolioIncresesBalanceWhenAddingAPortfolioWithPositiveBalance
-
-	| portfolio account portfolioInside |
-	
-	portfolio := Portfolio new.
-	portfolioInside := Portfolio new.
-	account := ReceptiveAccount new.
-	
-	portfolio addPortfolio: portfolioInside.
-	portfolioInside addReceptiveAccount: account.
 	Deposit register: 100 on: account. 
-
-	self assert: 100 equals: portfolio balance.
-! !
-
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:51:05'!
-test10PortfolioIncresesBalanceWhenAddingManyPortfolioWithPositiveBalance
-
-	| portfolio account1 account2 portfolioInside1 portfolioInside2 |
-	
-	portfolio := Portfolio new.
-	portfolioInside1 := Portfolio new.
-	portfolioInside2 := Portfolio new.
-	account1 := ReceptiveAccount new.
-	account2 := ReceptiveAccount new.
-	
-	portfolio addPortfolio: portfolioInside1.
-	portfolio addPortfolio: portfolioInside2.
-	
-	portfolioInside1 addReceptiveAccount: account1.
-	Deposit register: 100 on: account1. 
-	
-	portfolioInside2 addReceptiveAccount: account2.
 	Withdraw register: 50 on: account2. 
 
 	self assert: 50 equals: portfolio balance.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/16/2022 21:57:01'!
-test11PortfolioIncresesBalanceWhenAddingPortfoliosAndAccountsWithPositiveBalance
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:12:58'!
+test07PortfolioCanAddOnePortfolio
+	
+	portfolio addRegistry: portfolio2.
 
-	| portfolio account portfolioInside accountInside |
+	self assert: 1 equals: portfolio quantityOfRegistries.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:22:02'!
+test08PortfolioCanAddTwoPortfolio
 	
-	portfolio := Portfolio new.
-	portfolioInside := Portfolio new.
-	account := ReceptiveAccount new.
-	accountInside := ReceptiveAccount new.
+	portfolio addRegistry: portfolio2.
+	portfolio addRegistry: portfolio3.
 	
-	portfolio addPortfolio: portfolioInside.
-	portfolio addReceptiveAccount: account.
+	self assert: 2 equals: portfolio quantityOfRegistries.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:14:07'!
+test09PortfolioIncresesBalanceWhenAddingAPortfolioWithPositiveBalance
 	
-	portfolioInside addReceptiveAccount: accountInside.
-	Deposit register: 100 on: accountInside. 
+	portfolio addRegistry: portfolio2.
+	portfolio2 addRegistry: account.
+	Deposit register: 100 on: account. 
+
+	self assert: 100 equals: portfolio balance.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:22:10'!
+test10PortfolioIncresesBalanceWhenAddingManyPortfolioWithPositiveBalance
+
+	portfolio addRegistry: portfolio2.
+	portfolio addRegistry: portfolio3.
+	
+	portfolio2 addRegistry: account.
+	Deposit register: 100 on: account. 
+	
+	portfolio3 addRegistry: account2.
+	Withdraw register: 50 on: account2. 
+
+	self assert: 50 equals: portfolio balance.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:19:43'!
+test11PortfolioIncresesBalanceWhenAddingPortfoliosAndAccountsWithPositiveBalance
+	
+	portfolio addRegistry: portfolio2.
+	portfolio addRegistry: account.
+	
+	portfolio2 addRegistry: account2.
+	Deposit register: 100 on: account2. 
 	
 	Withdraw register: 50 on: account.
 
 	self assert: 50 equals: portfolio balance.
 ! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:12:10'!
+test12PortfolioWithoutAccountsHasNotRegisteredATransaction
+
+	| deposit |
+	
+	deposit := Deposit register: 100 on: account.
+
+	self deny: (portfolio hasRegistered: deposit).
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:12:10'!
+test13PortfolioWithAnAccountWithTransactionsHasRegisteredATransaction
+
+	| deposit |
+	
+	deposit := Deposit register: 100 on: account.
+	
+	portfolio addRegistry: account.
+
+	self assert: (portfolio hasRegistered: deposit).
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:20:19'!
+test14PortfolioWithAnEmptyAccountHasNotRegisteredATransaction
+
+	| deposit |
+	
+	deposit := Deposit register: 100 on: account.
+	
+	portfolio addRegistry: account2.
+
+	self deny: (portfolio hasRegistered: deposit).
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:20:33'!
+test15PortfolioWithTwoAccountsHasRegisteredATransaction
+
+	| deposit |
+	
+	deposit := Deposit register: 100 on: account.
+	
+	portfolio addRegistry: account2.
+	portfolio addRegistry: account.
+
+	self assert: (portfolio hasRegistered: deposit).
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:16:03'!
+test16PortfolioHasRegisteredATransactionWhenAddingPortfolioThatHasIt
+
+	| deposit |
+	
+	deposit := Deposit register: 100 on: account.
+	
+	portfolio2 addRegistry: account.
+	portfolio addRegistry: portfolio2.
+
+	self assert: (portfolio hasRegistered: deposit).
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:05:39'!
+test17EmptyPortfolioKnowsItsTransactions
+
+	self assert: 0 equals: portfolio transactions size.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:16:13'!
+test18PortfolioWithAccountsKnowsItsTransactions
+
+	| deposit transactions |
+	
+	deposit := Deposit register: 100 on: account.
+	
+	portfolio addRegistry: account.
+	
+	transactions := Set with: deposit.
+
+	self assert: 1 equals: portfolio transactions size.
+	self assert: transactions equals: portfolio transactions.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/21/2022 18:21:04'!
+test19PortfolioWithPortfolioAndAccountKnowsItsTransactions
+
+	| deposit transactions withdraw |
+	
+	portfolio addRegistry: portfolio2.
+	portfolio addRegistry: account.
+	portfolio2 addRegistry: account2.
+	
+	deposit := Deposit register: 100 on: account.
+	withdraw := Withdraw register: 100 on: account2.
+	
+	transactions := Set with: deposit with: withdraw.
+
+	self assert: 2 equals: portfolio transactions size.
+	self assert: transactions equals: portfolio transactions.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 00:37:46'!
+test20PortfolioCannotAddTheSameAccountMoreThanOneTime
+	
+	portfolio addRegistry: account.
+	
+	self addingAccountToPortfolioShouldRaiseDuplicatedRegistryError.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 00:37:42'!
+test21PortfolioWithPortfolioInsideWithAccountCannotAddTheSameAccount
+	
+	portfolio addRegistry: portfolio2.
+	portfolio2 addRegistry: account.
+	
+	self addingAccountToPortfolioShouldRaiseDuplicatedRegistryError.
+! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 00:37:32'!
+test22PortfolioWithTwoPortfolioNestedWithAccountCannotAddTheSameAccount
+	
+	portfolio addRegistry: portfolio2.
+	portfolio2 addRegistry: portfolio3.
+	portfolio3 addRegistry: account.
+	
+	self addingAccountToPortfolioShouldRaiseDuplicatedRegistryError.
+! !
+
+
+!PortfolioTest methodsFor: 'setup' stamp: 'MYB 5/21/2022 18:21:48'!
+setUp 
+	
+	portfolio := Portfolio new.
+	portfolio2 := Portfolio new.
+	portfolio3 := Portfolio new.
+	account := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+! !
+
+
+!PortfolioTest methodsFor: 'assertions' stamp: 'MYB 5/22/2022 00:37:32'!
+addingAccountToPortfolioShouldRaiseDuplicatedRegistryError
+
+	self
+		should: [ portfolio addRegistry: account ]
+		raise: Error
+		withMessageText: Portfolio duplicatedRegistryErrorDescription.
+	
+	self assert: 1 equals: portfolio quantityOfRegistries.! !
 
 
 !classDefinition: #ReceptiveAccountTest category: 'Portfolio-Ejercicio'!
@@ -280,10 +362,10 @@ Object subclass: #AccountTransaction
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!AccountTransaction methodsFor: 'value - private' stamp: 'MYB 5/16/2022 20:58:58'!
-valueForBalance: aValue
+!AccountTransaction methodsFor: 'initialization' stamp: 'MYB 5/16/2022 20:19:11'!
+initializeFor: aValue
 
-	^ self subclassResponsibility ! !
+	value := aValue ! !
 
 
 !AccountTransaction methodsFor: 'value' stamp: 'MYB 5/16/2022 20:57:59'!
@@ -297,10 +379,10 @@ value
 	^ value! !
 
 
-!AccountTransaction methodsFor: 'initialization' stamp: 'MYB 5/16/2022 20:19:11'!
-initializeFor: aValue
+!AccountTransaction methodsFor: 'value - private' stamp: 'MYB 5/16/2022 20:58:58'!
+valueForBalance: aValue
 
-	value := aValue ! !
+	^ self subclassResponsibility ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -367,55 +449,135 @@ for: aValue
 	^ self new initializeFor: aValue ! !
 
 
-!classDefinition: #Portfolio category: 'Portfolio-Ejercicio'!
-Object subclass: #Portfolio
-	instanceVariableNames: 'receptiveAccounts portfolios'
+!classDefinition: #FinancialRegistry category: 'Portfolio-Ejercicio'!
+Object subclass: #FinancialRegistry
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!Portfolio methodsFor: 'balance' stamp: 'MYB 5/16/2022 21:57:57'!
+!FinancialRegistry methodsFor: 'accesing' stamp: 'MYB 5/19/2022 21:45:46'!
+balance
+
+	^ self subclassResponsibility.! !
+
+!FinancialRegistry methodsFor: 'accesing' stamp: 'MYB 5/19/2022 21:33:17'!
+transactions 
+
+	^ self subclassResponsibility.
+! !
+
+
+!FinancialRegistry methodsFor: 'assertions' stamp: 'MYB 5/22/2022 00:45:33'!
+assertCanBeAddedInConjunctionWith: anAlreadyInsideRegistry
+	
+	(self = anAlreadyInsideRegistry) ifTrue: [ ^ self signalDuplicatedRegistry ].! !
+
+
+!FinancialRegistry methodsFor: 'errors' stamp: 'MYB 5/22/2022 00:46:16'!
+signalDuplicatedRegistry
+
+	self error: self class duplicatedRegistryErrorDescription! !
+
+
+!FinancialRegistry methodsFor: 'testing' stamp: 'MYB 5/19/2022 21:32:53'!
+hasRegistered: aTransaction
+
+	^ self subclassResponsibility.
+! !
+
+!FinancialRegistry methodsFor: 'testing' stamp: 'MYB 5/22/2022 00:49:19'!
+hasRegistryInside: aRegistry
+
+	^ false! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'FinancialRegistry class' category: 'Portfolio-Ejercicio'!
+FinancialRegistry class
+	instanceVariableNames: ''!
+
+!FinancialRegistry class methodsFor: 'error descriptions' stamp: 'MYB 5/22/2022 00:47:14'!
+duplicatedRegistryErrorDescription
+
+	^ 'The registry you are trying to add is already registered inside'! !
+
+
+!classDefinition: #Portfolio category: 'Portfolio-Ejercicio'!
+FinancialRegistry subclass: #Portfolio
+	instanceVariableNames: 'registries'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Portfolio-Ejercicio'!
+
+!Portfolio methodsFor: 'accesing' stamp: 'MYB 5/21/2022 17:53:35'!
 balance
 	
-	^ (portfolios sum: [:portfolio | portfolio balance] ifEmpty: [0]) +
-		(receptiveAccounts sum: [:account | account balance] ifEmpty: [0])! !
+	^ (registries sum: [:registry | registry balance] ifEmpty: [0])! !
 
-
-!Portfolio methodsFor: 'modifying' stamp: 'MYB 5/16/2022 21:42:01'!
-addPortfolio: aPortfolio 
+!Portfolio methodsFor: 'accesing' stamp: 'MYB 5/21/2022 17:54:22'!
+quantityOfRegistries
 	
-	portfolios add: aPortfolio ! !
+	^ registries size! !
 
-!Portfolio methodsFor: 'modifying' stamp: 'MYB 5/16/2022 21:22:40'!
-addReceptiveAccount: aReceptiveAccount 
+!Portfolio methodsFor: 'accesing' stamp: 'MYB 5/21/2022 17:54:45'!
+transactions
 	
-	receptiveAccounts add: aReceptiveAccount ! !
-
-
-!Portfolio methodsFor: 'accesing' stamp: 'MYB 5/16/2022 21:22:55'!
-quantityOfAccounts
+	| transactions |
+	transactions := Set new.
+	registries do: [ :registry | transactions addAll: registry transactions].
 	
-	^ receptiveAccounts size! !
-
-!Portfolio methodsFor: 'accesing' stamp: 'MYB 5/16/2022 21:41:43'!
-quantityOfPortfolios
-	
-	^ portfolios size! !
+	^transactions! !
 
 
-!Portfolio methodsFor: 'initializing' stamp: 'MYB 5/16/2022 21:41:29'!
+!Portfolio methodsFor: 'initialization' stamp: 'MYB 5/21/2022 17:54:13'!
 initialize
 
-	receptiveAccounts := Set new.
-	portfolios := Set new.! !
+	registries := Set new.! !
+
+
+!Portfolio methodsFor: 'modifying' stamp: 'MYB 5/22/2022 00:49:07'!
+addRegistry: aRegistry
+
+	self hasRegistryInside: aRegistry.
+
+	registries add: aRegistry.! !
+
+
+!Portfolio methodsFor: 'testing' stamp: 'MYB 5/21/2022 17:54:03'!
+hasRegistered: aTransaction
+	
+	^(registries anySatisfy: [:registry | registry hasRegistered: aTransaction])! !
+
+!Portfolio methodsFor: 'testing' stamp: 'MYB 5/22/2022 00:49:07'!
+hasRegistryInside: aRegistry
+	
+	registries do: [ :registry | 
+		aRegistry assertCanBeAddedInConjunctionWith: registry.
+		registry hasRegistryInside: aRegistry.
+	].! !
 
 
 !classDefinition: #ReceptiveAccount category: 'Portfolio-Ejercicio'!
-Object subclass: #ReceptiveAccount
+FinancialRegistry subclass: #ReceptiveAccount
 	instanceVariableNames: 'transactions'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
+
+!ReceptiveAccount methodsFor: 'accesing' stamp: 'MYB 5/16/2022 20:43:11'!
+balance
+
+	| sum |
+	sum := 0.
+	transactions do: [ :aTransaction | sum := aTransaction sumToBalance: sum ].
+	^sum.! !
+
+!ReceptiveAccount methodsFor: 'accesing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
+transactions 
+
+	^ transactions copy! !
+
 
 !ReceptiveAccount methodsFor: 'initialization' stamp: 'NR 10/17/2019 15:06:56'!
 initialize
@@ -423,25 +585,11 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
+!ReceptiveAccount methodsFor: 'modifying' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 register: aTransaction
 
 	transactions add: aTransaction 
 ! !
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
-transactions 
-
-	^ transactions copy! !
-
-
-!ReceptiveAccount methodsFor: 'balance' stamp: 'MYB 5/16/2022 20:43:11'!
-balance
-
-	| sum |
-	sum := 0.
-	transactions do: [ :aTransaction | sum := aTransaction sumToBalance: sum ].
-	^sum.! !
 
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'NR 10/17/2019 03:28:43'!
