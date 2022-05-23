@@ -241,47 +241,35 @@ test22PortfolioWithTwoPortfolioNestedWithAccountCannotAddTheSameAccount
 	self addingAccountToPortfolioShouldRaiseDuplicatedRegistryError.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 15:38:03'!
+!PortfolioTest methodsFor: 'tests' stamp: 'id 5/22/2022 20:23:37'!
 test23PortfolioWithAccountCannotBeAddedToAPortfolioThatAlreadyHasThatAccount
 	
 	portfolio addRegistry: account.
 	portfolio2 addRegistry: account.
 	
-	self
-		should: [ portfolio addRegistry: portfolio2. ]
-		raise: Error
-		withMessageText: Portfolio duplicatedRegistryErrorDescription.
-	
+	self shouldRaiseDuplicatedRegistryErrorWhenAddingPortfolio: portfolio2.
 	self assert: 1 equals: portfolio quantityOfRegistries.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 15:49:23'!
+!PortfolioTest methodsFor: 'tests' stamp: 'id 5/22/2022 20:23:30'!
 test24PortfolioWithPorfolioWithAccountCannotAddAPortfolioThatAlreadyHasThatAccount
 	
 	portfolio addRegistry: portfolio2.
 	portfolio2 addRegistry: account.
 	portfolio3 addRegistry: account.
 	
-	self
-		should: [ portfolio addRegistry: portfolio3. ]
-		raise: Error
-		withMessageText: Portfolio duplicatedRegistryErrorDescription.
-	
+	self shouldRaiseDuplicatedRegistryErrorWhenAddingPortfolio: portfolio3.
 	self assert: 1 equals: portfolio quantityOfRegistries.
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/22/2022 16:07:30'!
+!PortfolioTest methodsFor: 'tests' stamp: 'id 5/22/2022 20:23:58'!
 test25PortfolioWithPorfolioCannotAddAPortfolioThatIsAlreadyInTheSecondPortfolio
 	
 	portfolio addRegistry: portfolio2.
 	
 	portfolio2 addRegistry: portfolio3.
 	
-	self
-		should: [ portfolio addRegistry: portfolio3. ]
-		raise: Error
-		withMessageText: Portfolio duplicatedRegistryErrorDescription.
-	
+	self shouldRaiseDuplicatedRegistryErrorWhenAddingPortfolio: portfolio3.
 	self assert: 1 equals: portfolio quantityOfRegistries.
 ! !
 
@@ -306,6 +294,14 @@ addingAccountToPortfolioShouldRaiseDuplicatedRegistryError
 		withMessageText: Portfolio duplicatedRegistryErrorDescription.
 	
 	self assert: 1 equals: portfolio quantityOfRegistries.! !
+
+!PortfolioTest methodsFor: 'assertions' stamp: 'id 5/22/2022 20:22:55'!
+shouldRaiseDuplicatedRegistryErrorWhenAddingPortfolio: aPortfolio
+
+	^ self
+		should: [ portfolio addRegistry: aPortfolio. ]
+		raise: Error
+		withMessageText: Portfolio duplicatedRegistryErrorDescription! !
 
 
 !classDefinition: #ReceptiveAccountTest category: 'Portfolio-Ejercicio'!
