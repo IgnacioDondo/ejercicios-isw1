@@ -508,10 +508,10 @@ transactions
 ! !
 
 
-!FinancialRegistry methodsFor: 'assertions' stamp: 'MYB 5/22/2022 00:45:33'!
+!FinancialRegistry methodsFor: 'assertions' stamp: 'id 5/22/2022 21:30:26'!
 assertCanBeAddedInConjunctionWith: anAlreadyInsideRegistry
 	
-	(self = anAlreadyInsideRegistry) ifTrue: [ ^ self signalDuplicatedRegistry ].! !
+	(self == anAlreadyInsideRegistry) ifTrue: [ ^ self signalDuplicatedRegistry ].! !
 
 
 !FinancialRegistry methodsFor: 'errors' stamp: 'MYB 5/22/2022 00:46:16'!
