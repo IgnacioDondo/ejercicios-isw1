@@ -321,6 +321,62 @@ test21AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultiplePortfoliosAndAc
 
 	self assert: portfolio1 accountSummary equals: expectedAccountSummary.! !
 
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/29/2022 18:51:26'!
+test22TransferNetReturnsZeroForPortfolioWithAccountWithNoTransfers
+
+	| portfolio account |
+	
+	account := ReceptiveAccount new.
+	portfolio := Portfolio with: account.
+
+	self assert: 0 equals: portfolio transferNet.! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/29/2022 19:06:16'!
+test23TransferNetReturnsTransferValueForDepositTransfer
+
+	| portfolio account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 10 from: account2 to: account1.
+	
+	portfolio := Portfolio with: account1.
+
+	self assert: 10 equals: portfolio transferNet.! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/29/2022 19:07:06'!
+test24TransferNetReturnsTheSumOfTransferValuesForPortfolioWithAccountsWithTwoTransfers
+
+	| portfolio account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 10 from: account2 to: account1.
+	
+	portfolio := Portfolio with: account1 with: account2.
+
+	self assert: 0 equals: portfolio transferNet.! !
+
+!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/29/2022 19:16:52'!
+test25TransferNetReturnsTheSumOfTransferValuesForPortfolioWithAccountsWithMultipleTransfersAndOtherTransactions
+
+	| account1 account2 account3 portfolio1 portfolio2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	account3 := ReceptiveAccount new.
+	
+	Transfer register: 10 from: account2 to: account1.
+	Transfer register: 10 from: account3 to: account1.
+	Deposit register: 100 on: account1.
+	
+	portfolio2 := Portfolio with: account1 with: account2.
+	portfolio1 := Portfolio with: portfolio2.
+
+	self assert: 10 equals: portfolio1 transferNet.! !
+
 
 !classDefinition: #ReceptiveAccountTest category: 'Portfolio-Solucion'!
 TestCase subclass: #ReceptiveAccountTest
@@ -905,6 +961,17 @@ accountSummary
 		into: [ :currentAccountSummary :anAccount | currentAccountSummary , (anAccount accountSummary) ].
 	
 	^accountSummary, 'Balance = ', self balance asString , String newLineString.! !
+
+!Portfolio methodsFor: 'reports' stamp: 'MYB 5/29/2022 19:16:21'!
+transferNet
+
+	| transferNet |
+
+	transferNet := accounts
+		inject: 0
+		into: [ :currentTransferNet :anAccount | currentTransferNet + (anAccount transferNet) ].
+	
+	^transferNet.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
