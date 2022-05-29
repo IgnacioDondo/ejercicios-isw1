@@ -518,8 +518,8 @@ test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfers
 	
 	self assert: 250 equals: account1 transferNet.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 15:00:22'!
-test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfersWithNegativeTransferNet
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 16:51:22'!
+test24TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfersWithNegativeTransferNet
 
 	| account1 account2 |
 	
@@ -532,6 +532,18 @@ test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfersWit
 	Transfer register: 200 from: account1 to: account2.
 	
 	self assert: -250 equals: account1 transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 16:52:39'!
+test25DepositAndWithdrawDoNotAffectTheTransferNetValue
+
+	| account |
+	
+	account := ReceptiveAccount new.
+	
+	Deposit register: 100 on: account.
+	Withdraw register: 30 on: account.
+	
+	self assert: 0 equals: account transferNet.! !
 
 
 !classDefinition: #TransferTest category: 'Portfolio-Solucion'!
@@ -845,39 +857,21 @@ transactions
 	^ transactions copy! !
 
 
-!ReceptiveAccount methodsFor: 'reports' stamp: 'id 5/29/2022 14:20:05'!
+!ReceptiveAccount methodsFor: 'reports' stamp: 'id 5/29/2022 16:44:35'!
 accountSummary
 
 	| accountSummary |
-
+	
 	accountSummary := transactions
 		inject: ''
-		into: [ :currentSummary :aTransaction |
-			| newSummaryLine |
-			
-			(aTransaction isKindOf: Deposit) ifTrue: [ newSummaryLine := 'Depósito por ', (aTransaction value) asString, '.'].
-			(aTransaction isKindOf: Withdraw) ifTrue: [ newSummaryLine := 'Extracción por ', (aTransaction value) asString, '.' ].
-			(aTransaction isKindOf: WithdrawTransferLeg) ifTrue: [ newSummaryLine := 'Salida por transferencia de ', (aTransaction value) asString, '.' ].
-			(aTransaction isKindOf: DepositTransferLeg) ifTrue: [ newSummaryLine := 'Entrada por transferencia de ', (aTransaction value) asString, '.' ].
-			
-			currentSummary , newSummaryLine.
-		].
-	
+		into: [ :currentAccountSummary :aTransaction | aTransaction affectAccountSummary: currentAccountSummary ].
+
 	^accountSummary, 'Balance = ', self balance asString.! !
 
-!ReceptiveAccount methodsFor: 'reports' stamp: 'id 5/29/2022 14:57:12'!
+!ReceptiveAccount methodsFor: 'reports' stamp: 'id 5/29/2022 16:37:54'!
 transferNet
 	
-	| transferNet |
-	
-	transferNet := 0.
-	
-	transactions do: [ :aTransaction |
-		(aTransaction isKindOf: DepositTransferLeg) ifTrue: [ transferNet := transferNet + aTransaction value ].
-		(aTransaction isKindOf: WithdrawTransferLeg) ifTrue: [ transferNet := transferNet + aTransaction value negated ].
-	].
-	
-	^transferNet.! !
+	^transactions inject: 0 into: [ :currentTransferNet :aTransaction | aTransaction affectTransferNet: currentTransferNet ].! !
 
 
 !classDefinition: #AccountTransaction category: 'Portfolio-Solucion'!
@@ -891,6 +885,17 @@ Object subclass: #AccountTransaction
 affectBalance: aBalance
 
 	self subclassResponsibility ! !
+
+
+!AccountTransaction methodsFor: 'reports' stamp: 'id 5/29/2022 16:41:01'!
+affectAccountSummary: anAccountSummary
+
+	self subclassResponsibility.! !
+
+!AccountTransaction methodsFor: 'reports' stamp: 'id 5/29/2022 16:41:03'!
+affectTransferNet: aTransferNet
+
+	self subclassResponsibility.! !
 
 
 !AccountTransaction methodsFor: 'value' stamp: 'HernanWilkinson 9/12/2011 12:25'!
@@ -932,6 +937,17 @@ affectBalance: aBalance
 initializeFor: aValue
 
 	value := aValue ! !
+
+
+!Deposit methodsFor: 'reports' stamp: 'id 5/29/2022 16:43:51'!
+affectAccountSummary: anAccountSummary
+
+	^anAccountSummary , 'Depósito por ', (self value) asString, '.'.! !
+
+!Deposit methodsFor: 'reports' stamp: 'id 5/29/2022 16:36:38'!
+affectTransferNet: aTransferNet
+
+	^aTransferNet! !
 
 
 !Deposit methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:38'!
@@ -1005,6 +1021,17 @@ withdrawLeg
 	
 	^transfer withdrawLeg.! !
 
+
+!DepositTransferLeg methodsFor: 'reports' stamp: 'id 5/29/2022 16:42:56'!
+affectAccountSummary: anAccountSummary
+
+	^anAccountSummary , 'Entrada por transferencia de ', (self value) asString, '.'.! !
+
+!DepositTransferLeg methodsFor: 'reports' stamp: 'id 5/29/2022 16:37:21'!
+affectTransferNet: aTransferNet
+
+	^aTransferNet + self value.! !
+
 
 !classDefinition: #WithdrawTransferLeg category: 'Portfolio-Solucion'!
 TransferLeg subclass: #WithdrawTransferLeg
@@ -1024,6 +1051,17 @@ depositLeg
 	
 	^transfer depositLeg.! !
 
+
+!WithdrawTransferLeg methodsFor: 'reports' stamp: 'id 5/29/2022 16:43:30'!
+affectAccountSummary: anAccountSummary
+
+	^anAccountSummary , 'Salida por transferencia de ', (self value) asString, '.'.! !
+
+!WithdrawTransferLeg methodsFor: 'reports' stamp: 'id 5/29/2022 16:37:31'!
+affectTransferNet: aTransferNet
+
+	^aTransferNet - self value.! !
+
 
 !classDefinition: #Withdraw category: 'Portfolio-Solucion'!
 AccountTransaction subclass: #Withdraw
@@ -1042,6 +1080,17 @@ affectBalance: aBalance
 initializeFor: aValue
 
 	value := aValue ! !
+
+
+!Withdraw methodsFor: 'reports' stamp: 'id 5/29/2022 16:44:00'!
+affectAccountSummary: anAccountSummary
+
+	^anAccountSummary , 'Extracción por ', (self value) asString, '.'.! !
+
+!Withdraw methodsFor: 'reports' stamp: 'id 5/29/2022 16:37:01'!
+affectTransferNet: aTransferNet
+
+	^aTransferNet! !
 
 
 !Withdraw methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:33'!
