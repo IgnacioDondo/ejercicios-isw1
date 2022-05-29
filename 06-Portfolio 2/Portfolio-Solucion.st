@@ -336,6 +336,203 @@ test09TransferIsRegisteredInBothAccounts
 	self assert: (account1 hasRegistered: transfer withdrawLeg).
 	self assert: (account2 hasRegistered: transfer depositLeg).! !
 
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:04:13'!
+test10AccountSummaryOnlyPrintsBalanceForAccountWithNoTransactions
+
+	| account |
+	
+	account := ReceptiveAccount new.
+	
+	self assert: account accountSummary equals: 'Balance = 0'.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:06:27'!
+test11AccountSummaryPrintsCorrectLineForDeposits
+
+	| account |
+	
+	account := ReceptiveAccount new.
+	Deposit register: 100 on: account.
+	
+	self assert: account accountSummary equals: 'Depósito por 100.Balance = 100'.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:06:42'!
+test12AccountSummaryPrintsCorrectLineForDepositsAndWithdraws
+
+	| account expectedAccountSummary |
+	
+	account := ReceptiveAccount new.
+	Deposit register: 100 on: account.
+	Withdraw register: 50 on: account.
+	
+	expectedAccountSummary := 'Depósito por 100.Extracción por 50.Balance = 50'.
+	
+	self assert: account accountSummary equals: expectedAccountSummary.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:09:12'!
+test13AccountSummaryPrintsCorrectLineForDepositsAndWithdrawsWithNegativeBalance
+
+	| account expectedAccountSummary |
+	
+	account := ReceptiveAccount new.
+	Deposit register: 100 on: account.
+	Withdraw register: 150 on: account.
+	
+	expectedAccountSummary := 'Depósito por 100.Extracción por 150.Balance = -50'.
+	
+	self assert: account accountSummary equals: expectedAccountSummary.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:17:38'!
+test14AccountSummaryPrintsCorrectLineForWithdrawTransfers
+
+	| account1 account2 expectedAccountSummary |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 20 from: account1 to: account2.
+	
+	expectedAccountSummary := 'Salida por transferencia de 20.Balance = -20'.
+	
+	self assert: account1 accountSummary equals: expectedAccountSummary.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:19:26'!
+test15AccountSummaryPrintsCorrectLineForDepositTransfers
+
+	| account1 account2 expectedAccountSummary |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 20 from: account2 to: account1.
+	
+	expectedAccountSummary := 'Entrada por transferencia de 20.Balance = 20'.
+	
+	self assert: account1 accountSummary equals: expectedAccountSummary.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:34:23'!
+test16AccountSummaryPrintsCorrectLineForAccountWithMultipleTransactions
+
+	| account1 account2 expectedAccountSummary |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Deposit register: 100 on: account1.
+	Transfer register: 20 from: account1 to: account2.
+	Deposit register: 200 on: account1.
+	Withdraw register: 10 on: account1.
+	Transfer register: 20 from: account2 to: account1.
+	
+	expectedAccountSummary := 'Depósito por 100.Salida por transferencia de 20.Depósito por 200.Extracción por 10.Entrada por transferencia de 20.Balance = 290'.
+	
+	self assert: account1 accountSummary equals: expectedAccountSummary.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:35:20'!
+test17AccountSummaryPrintsCorrectLineForAccountWithMultipleTransactionsWithNegativeBalance
+
+	| account1 account2 expectedAccountSummary |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Deposit register: 100 on: account1.
+	Transfer register: 20 from: account1 to: account2.
+	Withdraw register: 300 on: account1.
+	Transfer register: 20 from: account2 to: account1.
+	
+	expectedAccountSummary := 'Depósito por 100.Salida por transferencia de 20.Extracción por 300.Entrada por transferencia de 20.Balance = -200'.
+	
+	self assert: account1 accountSummary equals: expectedAccountSummary.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:51:46'!
+test18TransferNetReturnsZeroForAccountWithNoTransfers
+
+	| account |
+	
+	account := ReceptiveAccount new.
+	
+	self assert: 0 equals: account transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:53:40'!
+test19TransferNetReturnsTransferValueForDepositTransfer
+
+	| account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 10 from: account2 to: account1.
+	
+	self assert: 10 equals: account1 transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:56:47'!
+test20TransferNetReturnsTransferValueForWithdrawTransfer
+
+	| account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 10 from: account1 to: account2.
+	
+	self assert: -10 equals: account1 transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:58:31'!
+test21TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleDepositTransfers
+
+	| account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 20 from: account2 to: account1.
+	Transfer register: 100 from: account2 to: account1.
+	
+	self assert: 120 equals: account1 transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:58:55'!
+test22TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleWithdrawTransfers
+
+	| account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 20 from: account1 to: account2.
+	Transfer register: 100 from: account1 to: account2.
+	
+	self assert: -120 equals: account1 transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 14:59:46'!
+test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfers
+
+	| account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 100 from: account2 to: account1.
+	Transfer register: 10 from: account1 to: account2.
+	Transfer register: 40 from: account1 to: account2.
+	Transfer register: 200 from: account2 to: account1.
+	
+	self assert: 250 equals: account1 transferNet.! !
+
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'id 5/29/2022 15:00:22'!
+test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfersWithNegativeTransferNet
+
+	| account1 account2 |
+	
+	account1 := ReceptiveAccount new.
+	account2 := ReceptiveAccount new.
+	
+	Transfer register: 100 from: account1 to: account2.
+	Transfer register: 10 from: account2 to: account1.
+	Transfer register: 40 from: account2 to: account1.
+	Transfer register: 200 from: account1 to: account2.
+	
+	self assert: -250 equals: account1 transferNet.! !
+
 
 !classDefinition: #TransferTest category: 'Portfolio-Solucion'!
 TestCase subclass: #TransferTest
@@ -646,6 +843,41 @@ register: aTransaction
 transactions 
 
 	^ transactions copy! !
+
+
+!ReceptiveAccount methodsFor: 'reports' stamp: 'id 5/29/2022 14:20:05'!
+accountSummary
+
+	| accountSummary |
+
+	accountSummary := transactions
+		inject: ''
+		into: [ :currentSummary :aTransaction |
+			| newSummaryLine |
+			
+			(aTransaction isKindOf: Deposit) ifTrue: [ newSummaryLine := 'Depósito por ', (aTransaction value) asString, '.'].
+			(aTransaction isKindOf: Withdraw) ifTrue: [ newSummaryLine := 'Extracción por ', (aTransaction value) asString, '.' ].
+			(aTransaction isKindOf: WithdrawTransferLeg) ifTrue: [ newSummaryLine := 'Salida por transferencia de ', (aTransaction value) asString, '.' ].
+			(aTransaction isKindOf: DepositTransferLeg) ifTrue: [ newSummaryLine := 'Entrada por transferencia de ', (aTransaction value) asString, '.' ].
+			
+			currentSummary , newSummaryLine.
+		].
+	
+	^accountSummary, 'Balance = ', self balance asString.! !
+
+!ReceptiveAccount methodsFor: 'reports' stamp: 'id 5/29/2022 14:57:12'!
+transferNet
+	
+	| transferNet |
+	
+	transferNet := 0.
+	
+	transactions do: [ :aTransaction |
+		(aTransaction isKindOf: DepositTransferLeg) ifTrue: [ transferNet := transferNet + aTransaction value ].
+		(aTransaction isKindOf: WithdrawTransferLeg) ifTrue: [ transferNet := transferNet + aTransaction value negated ].
+	].
+	
+	^transferNet.! !
 
 
 !classDefinition: #AccountTransaction category: 'Portfolio-Solucion'!
