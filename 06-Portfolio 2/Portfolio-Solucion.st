@@ -233,7 +233,8 @@ test15PortfolioCanNotIncludeAnyOfTheComposedAccountOfPortfolioToAdd
 			self assert: Portfolio canNotAddAccountErrorMessage equals: anError messageText.
 			self assert: portfolioToModify accountsIsEmpty ]! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:06:41'!
+
+!PortfolioTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:06:41'!
 test16AccountSummaryOnlyPrintsBalanceForPortfoliosWithNoTransactions
 
 	| portfolio expectedAccountSummary |
@@ -244,7 +245,7 @@ test16AccountSummaryOnlyPrintsBalanceForPortfoliosWithNoTransactions
 	
 	self assert: (self createAccountSummaryReportOf: portfolio) equals: expectedAccountSummary.! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:23:47'!
+!PortfolioTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:23:47'!
 test17AccountSummaryPrintsCorrectAccountSummaryWhenHavingOnlyOneAccount
 
 	| portfolio account expectedAccountSummary |
@@ -256,7 +257,7 @@ test17AccountSummaryPrintsCorrectAccountSummaryWhenHavingOnlyOneAccount
 	
 	self assert: (self createAccountSummaryReportOf: portfolio) equals:  expectedAccountSummary.! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:24:03'!
+!PortfolioTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:24:03'!
 test18AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultipleAccounts
 
 	| portfolio account1 account2 expectedAccountSummary |
@@ -273,7 +274,7 @@ test18AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultipleAccounts
 	
 	self assert: (self createAccountSummaryReportOf: portfolio) equals: expectedAccountSummary.! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:24:20'!
+!PortfolioTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:24:20'!
 test19AccountSummaryPrintsCorrectAccountSummaryWhenHavingOnePortfolio
 
 	| portfolio1 portfolio2 account expectedAccountSummary |
@@ -289,7 +290,7 @@ test19AccountSummaryPrintsCorrectAccountSummaryWhenHavingOnePortfolio
 	
 	self assert: (self createAccountSummaryReportOf: portfolio1) equals: expectedAccountSummary.! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:24:36'!
+!PortfolioTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:24:36'!
 test20AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultiplePortfolios
 
 	| portfolio1 portfolio2 portfolio3 account1 account2 expectedAccountSummary |
@@ -308,7 +309,7 @@ test20AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultiplePortfolios
 	
 	self assert: (self createAccountSummaryReportOf: portfolio1) equals: expectedAccountSummary.! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:24:58'!
+!PortfolioTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:24:58'!
 test21AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultiplePortfoliosAndAccounts
 
 	| portfolio1 portfolio2 portfolio3 account1 account2 account3 account4 expectedAccountSummary |
@@ -332,7 +333,8 @@ test21AccountSummaryPrintsCorrectAccountSummaryWhenHavingMultiplePortfoliosAndAc
 
 	self assert: (self createAccountSummaryReportOf: portfolio1) equals: expectedAccountSummary.! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:25:23'!
+
+!PortfolioTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:25:23'!
 test22TransferNetReturnsZeroForPortfolioWithAccountWithNoTransfers
 
 	| portfolio account |
@@ -342,7 +344,7 @@ test22TransferNetReturnsZeroForPortfolioWithAccountWithNoTransfers
 
 	self assert: 0 equals: (self createTransferNetReportOf: portfolio) .! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:25:28'!
+!PortfolioTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:25:28'!
 test23TransferNetReturnsTransferValueForDepositTransfer
 
 	| portfolio account1 account2 |
@@ -356,7 +358,7 @@ test23TransferNetReturnsTransferValueForDepositTransfer
 
 	self assert: 10 equals: (self createTransferNetReportOf: portfolio).! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:25:34'!
+!PortfolioTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:25:34'!
 test24TransferNetReturnsTheSumOfTransferValuesForPortfolioWithAccountsWithTwoTransfers
 
 	| portfolio account1 account2 |
@@ -370,7 +372,7 @@ test24TransferNetReturnsTheSumOfTransferValuesForPortfolioWithAccountsWithTwoTra
 
 	self assert: 0 equals: (self createTransferNetReportOf: portfolio).! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:25:56'!
+!PortfolioTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:25:56'!
 test25TransferNetReturnsTheSumOfTransferValuesForPortfolioWithAccountsWithMultipleTransfersAndOtherTransactions
 
 	| account1 account2 account3 portfolio1 portfolio2 |
@@ -531,7 +533,8 @@ test09TransferIsRegisteredInBothAccounts
 	self assert: (account1 hasRegistered: transfer withdrawLeg).
 	self assert: (account2 hasRegistered: transfer depositLeg).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/29/2022 23:57:48'!
+
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/29/2022 23:57:48'!
 test10AccountSummaryOnlyPrintsBalanceForAccountWithNoTransactions
 
 	| account expectedAccountSummary |
@@ -542,7 +545,7 @@ test10AccountSummaryOnlyPrintsBalanceForAccountWithNoTransactions
 	
 	self assert: (self createAccountSummaryReportOf: account) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:01:29'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:01:29'!
 test11AccountSummaryPrintsCorrectLineForDeposits
 
 	| account expectedAccountSummary |
@@ -554,7 +557,7 @@ test11AccountSummaryPrintsCorrectLineForDeposits
 	
 	self assert: (self createAccountSummaryReportOf: account) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:01:34'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:01:34'!
 test12AccountSummaryPrintsCorrectLineForDepositsAndWithdraws
 
 	| account expectedAccountSummary |
@@ -567,7 +570,7 @@ test12AccountSummaryPrintsCorrectLineForDepositsAndWithdraws
 	
 	self assert: (self createAccountSummaryReportOf: account) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:01:50'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:01:50'!
 test13AccountSummaryPrintsCorrectLineForDepositsAndWithdrawsWithNegativeBalance
 
 	| account expectedAccountSummary |
@@ -580,7 +583,7 @@ test13AccountSummaryPrintsCorrectLineForDepositsAndWithdrawsWithNegativeBalance
 	
 	self assert: (self createAccountSummaryReportOf: account) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:02:09'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:02:09'!
 test14AccountSummaryPrintsCorrectLineForWithdrawTransfers
 
 	| account1 account2 expectedAccountSummary |
@@ -594,7 +597,7 @@ test14AccountSummaryPrintsCorrectLineForWithdrawTransfers
 	
 	self assert: (self createAccountSummaryReportOf: account1) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:02:17'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:02:17'!
 test15AccountSummaryPrintsCorrectLineForDepositTransfers
 
 	| account1 account2 expectedAccountSummary |
@@ -608,7 +611,7 @@ test15AccountSummaryPrintsCorrectLineForDepositTransfers
 	
 	self assert: (self createAccountSummaryReportOf: account1) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:02:27'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:02:27'!
 test16AccountSummaryPrintsCorrectLineForAccountWithMultipleTransactions
 
 	| account1 account2 expectedAccountSummary |
@@ -626,7 +629,7 @@ test16AccountSummaryPrintsCorrectLineForAccountWithMultipleTransactions
 	
 	self assert: (self createAccountSummaryReportOf: account1) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:02:34'!
+!ReceptiveAccountTest methodsFor: 'tests - account summary' stamp: 'MYB 5/30/2022 00:02:34'!
 test17AccountSummaryPrintsCorrectLineForAccountWithMultipleTransactionsWithNegativeBalance
 
 	| account1 account2 expectedAccountSummary |
@@ -643,7 +646,8 @@ test17AccountSummaryPrintsCorrectLineForAccountWithMultipleTransactionsWithNegat
 	
 	self assert: (self createAccountSummaryReportOf: account1) equals: expectedAccountSummary.! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:13'!
+
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:13'!
 test18TransferNetReturnsZeroForAccountWithNoTransfers
 
 	| account |
@@ -652,7 +656,7 @@ test18TransferNetReturnsZeroForAccountWithNoTransfers
 	
 	self assert: 0 equals: (self createTransferNetReportOf: account).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:26'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:26'!
 test19TransferNetReturnsTransferValueForDepositTransfer
 
 	| account1 account2 |
@@ -664,7 +668,7 @@ test19TransferNetReturnsTransferValueForDepositTransfer
 	
 	self assert: 10 equals: (self createTransferNetReportOf: account1).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:32'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:32'!
 test20TransferNetReturnsTransferValueForWithdrawTransfer
 
 	| account1 account2 |
@@ -676,7 +680,7 @@ test20TransferNetReturnsTransferValueForWithdrawTransfer
 	
 	self assert: -10 equals: (self createTransferNetReportOf: account1).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:37'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:37'!
 test21TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleDepositTransfers
 
 	| account1 account2 |
@@ -689,7 +693,7 @@ test21TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleDepositTrans
 	
 	self assert: 120 equals: (self createTransferNetReportOf: account1).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:44'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:44'!
 test22TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleWithdrawTransfers
 
 	| account1 account2 |
@@ -702,7 +706,7 @@ test22TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleWithdrawTran
 	
 	self assert: -120 equals: (self createTransferNetReportOf: account1).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:50'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:50'!
 test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfers
 
 	| account1 account2 |
@@ -717,7 +721,7 @@ test23TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfers
 	
 	self assert: 250 equals: (self createTransferNetReportOf: account1).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:03:56'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:03:56'!
 test24TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfersWithNegativeTransferNet
 
 	| account1 account2 |
@@ -732,7 +736,7 @@ test24TransferNetReturnsTheSumOfTransferValuesForAccountWithMultipleTransfersWit
 	
 	self assert: -250 equals: (self createTransferNetReportOf: account1).! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'MYB 5/30/2022 00:04:03'!
+!ReceptiveAccountTest methodsFor: 'tests - transfer net' stamp: 'MYB 5/30/2022 00:04:03'!
 test25DepositAndWithdrawDoNotAffectTheTransferNetValue
 
 	| account |
@@ -752,40 +756,41 @@ TestCase subclass: #TransferTest
 	poolDictionaries: ''
 	category: 'Portfolio-Solucion'!
 
-!TransferTest methodsFor: 'tests' stamp: 'id 5/28/2022 17:39:50'!
+!TransferTest methodsFor: 'auxiliary' stamp: 'id 5/30/2022 01:03:16'!
+depositOnAccountsAndTransferFrom: originAccount to: destinationAccount
+
+	Deposit register: 100 on: originAccount.
+	Deposit register: 100 on: destinationAccount.
+	
+	^Transfer register: 10 from: originAccount to: destinationAccount.! !
+
+
+!TransferTest methodsFor: 'tests' stamp: 'id 5/30/2022 01:03:47'!
 test01TransferIncreasesBalanceOfOriginAccountAndDecreasesBalanceOfDestinationAccount
 
 	| originAccount destinationAccount transfer |
 	
 	originAccount := ReceptiveAccount new.
 	destinationAccount  := ReceptiveAccount new.
-	
-	Deposit register: 100 on: originAccount.
-	Deposit register: 100 on: destinationAccount.
-	
-	transfer := Transfer register: 10 from: originAccount to: destinationAccount.
+	transfer := self depositOnAccountsAndTransferFrom: originAccount to: destinationAccount.
 	
 	self assert: 10 equals: transfer value.
 	self assert: 90 equals: originAccount balance.
 	self assert: 110 equals: destinationAccount balance.! !
 
-!TransferTest methodsFor: 'tests' stamp: 'id 5/28/2022 18:04:39'!
+!TransferTest methodsFor: 'tests' stamp: 'id 5/30/2022 01:03:42'!
 test02TransferRegistersTheTransactionOnOriginAccountAndDestinationAccount
 
 	| originAccount destinationAccount transfer |
 	
 	originAccount := ReceptiveAccount new.
 	destinationAccount  := ReceptiveAccount new.
-	
-	Deposit register: 100 on: originAccount.
-	Deposit register: 100 on: destinationAccount.
-	
-	transfer := Transfer register: 10 from: originAccount to: destinationAccount.
+	transfer := self depositOnAccountsAndTransferFrom: originAccount to: destinationAccount.
 	
 	self assert: (originAccount hasRegistered: transfer withdrawLeg).
 	self assert: (destinationAccount hasRegistered: transfer depositLeg).! !
 
-!TransferTest methodsFor: 'tests' stamp: 'id 5/28/2022 18:05:34'!
+!TransferTest methodsFor: 'tests' stamp: 'id 5/30/2022 01:03:58'!
 test03CanNavigateFromOriginLegToDestinationLeg
 
 	| originAccount destinationAccount transfer withdrawLeg depositLeg |
@@ -793,16 +798,13 @@ test03CanNavigateFromOriginLegToDestinationLeg
 	originAccount := ReceptiveAccount new.
 	destinationAccount  := ReceptiveAccount new.
 	
-	Deposit register: 100 on: originAccount.
-	Deposit register: 100 on: destinationAccount.
-	
-	transfer := Transfer register: 10 from: originAccount to: destinationAccount.
+	transfer := self depositOnAccountsAndTransferFrom: originAccount to: destinationAccount.
 	withdrawLeg := transfer withdrawLeg.
 	depositLeg  := transfer depositLeg.
 	
 	self assert: withdrawLeg depositLeg equals: depositLeg.! !
 
-!TransferTest methodsFor: 'tests' stamp: 'id 5/28/2022 18:06:29'!
+!TransferTest methodsFor: 'tests' stamp: 'id 5/30/2022 01:04:06'!
 test04CanNavigateFromDestinationLegToOriginLeg
 
 	| originAccount destinationAccount transfer withdrawLeg depositLeg |
@@ -810,10 +812,7 @@ test04CanNavigateFromDestinationLegToOriginLeg
 	originAccount := ReceptiveAccount new.
 	destinationAccount  := ReceptiveAccount new.
 	
-	Deposit register: 100 on: originAccount.
-	Deposit register: 100 on: destinationAccount.
-	
-	transfer := Transfer register: 10 from: originAccount to: destinationAccount.
+	transfer := self depositOnAccountsAndTransferFrom: originAccount to: destinationAccount.
 	withdrawLeg := transfer withdrawLeg.
 	depositLeg  := transfer depositLeg.
 	
@@ -827,30 +826,8 @@ Object subclass: #Account
 	poolDictionaries: ''
 	category: 'Portfolio-Solucion'!
 
-!Account methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:23:47'!
-hasRegistered: aTransaction
-
-	self subclassResponsibility ! !
-
-!Account methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:24:25'!
-isComposedBy: anAccount
-
-	self subclassResponsibility ! !
-
-
 !Account methodsFor: 'balance' stamp: 'HAW 5/25/2019 12:23:40'!
 balance
-
-	self subclassResponsibility ! !
-
-
-!Account methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:27'!
-addTransactionsTo: aCollectionOfTransactions
-
-	self subclassResponsibility ! !
-
-!Account methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:15'!
-transactions
 
 	self subclassResponsibility ! !
 
@@ -866,6 +843,28 @@ useReporter: aReporter
 	
 	self subclassResponsibility ! !
 
+
+!Account methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:23:47'!
+hasRegistered: aTransaction
+
+	self subclassResponsibility ! !
+
+!Account methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:24:25'!
+isComposedBy: anAccount
+
+	self subclassResponsibility ! !
+
+
+!Account methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:27'!
+addTransactionsTo: aCollectionOfTransactions
+
+	self subclassResponsibility ! !
+
+!Account methodsFor: 'transactions' stamp: 'HAW 5/25/2019 12:23:15'!
+transactions
+
+	self subclassResponsibility ! !
+
 
 !classDefinition: #Portfolio category: 'Portfolio-Solucion'!
 Account subclass: #Portfolio
@@ -873,6 +872,25 @@ Account subclass: #Portfolio
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Solucion'!
+
+!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 12:17:31'!
+addRootParentsTo: rootParents
+
+	parents 
+		ifEmpty: [ rootParents add: self ] 
+		ifNotEmpty: [ parents do: [ :aParent | aParent addRootParentsTo: rootParents ]]! !
+
+!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 12:20:36'!
+assertCanAdd: accountToAdd
+
+	(self anyRootParentIsComposedBy: accountToAdd) ifTrue: [ self signalCanNotAddAccount ].
+! !
+
+!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 11:48:34'!
+signalCanNotAddAccount
+	
+	self error: self class canNotAddAccountErrorMessage! !
+
 
 !Portfolio methodsFor: 'accounts management' stamp: 'HAW 5/25/2019 11:49:20'!
 accountsIncludes: anAccount
@@ -909,6 +927,18 @@ rootParents
 	^ rootParents! !
 
 
+!Portfolio methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:19:36'!
+balance
+	
+	^accounts sum: [ :anAccount | anAccount balance ] ifEmpty: [ 0 ]! !
+
+
+!Portfolio methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:02:59'!
+addedTo: aPortfolio 
+	
+	parents add: aPortfolio ! !
+
+
 !Portfolio methodsFor: 'initialization' stamp: 'HAW 5/25/2019 12:03:18'!
 initialize
 
@@ -916,32 +946,10 @@ initialize
 	parents := OrderedCollection new.! !
 
 
-!Portfolio methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:19:36'!
-balance
+!Portfolio methodsFor: 'reports' stamp: 'MYB 5/29/2022 23:24:02'!
+useReporter: aReporter
 	
-	^accounts sum: [ :anAccount | anAccount balance ] ifEmpty: [ 0 ]! !
-
-
-!Portfolio methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:42:55'!
-addTransactionsTo: aCollectionOfTransactions
-
-	accounts do: [ :anAccount | anAccount addTransactionsTo: aCollectionOfTransactions ]! !
-
-!Portfolio methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:38:32'!
-transactions
-	
-	| transactions |
-	
-	transactions := OrderedCollection new.
-	accounts do: [ :anAccount | anAccount addTransactionsTo: transactions ].
-	
-	^transactions ! !
-
-
-!Portfolio methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:02:59'!
-addedTo: aPortfolio 
-	
-	parents add: aPortfolio ! !
+	^accounts do: [ :anAccount | anAccount useReporter: aReporter].! !
 
 
 !Portfolio methodsFor: 'testing' stamp: 'HAW 5/25/2019 12:20:56'!
@@ -960,29 +968,20 @@ isComposedBy: anAccount
 	^ self = anAccount or: [ accounts anySatisfy: [ :composedAccount | (composedAccount isComposedBy: anAccount) or: [ anAccount isComposedBy: composedAccount ]]]! !
 
 
-!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 12:17:31'!
-addRootParentsTo: rootParents
+!Portfolio methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:42:55'!
+addTransactionsTo: aCollectionOfTransactions
 
-	parents 
-		ifEmpty: [ rootParents add: self ] 
-		ifNotEmpty: [ parents do: [ :aParent | aParent addRootParentsTo: rootParents ]]! !
+	accounts do: [ :anAccount | anAccount addTransactionsTo: aCollectionOfTransactions ]! !
 
-!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 12:20:36'!
-assertCanAdd: accountToAdd
-
-	(self anyRootParentIsComposedBy: accountToAdd) ifTrue: [ self signalCanNotAddAccount ].
-! !
-
-!Portfolio methodsFor: 'account management - private' stamp: 'HAW 5/25/2019 11:48:34'!
-signalCanNotAddAccount
+!Portfolio methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:38:32'!
+transactions
 	
-	self error: self class canNotAddAccountErrorMessage! !
-
-
-!Portfolio methodsFor: 'reports' stamp: 'MYB 5/29/2022 23:24:02'!
-useReporter: aReporter
+	| transactions |
 	
-	^accounts do: [ :anAccount | anAccount useReporter: aReporter].! !
+	transactions := OrderedCollection new.
+	accounts do: [ :anAccount | anAccount addTransactionsTo: transactions ].
+	
+	^transactions ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1018,11 +1017,43 @@ Account subclass: #ReceptiveAccount
 	poolDictionaries: ''
 	category: 'Portfolio-Solucion'!
 
+!ReceptiveAccount methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:24:46'!
+balance
+
+	^transactions 
+		inject: 0
+		into: [ :currentBalance :transaction | transaction affectBalance: currentBalance ]! !
+
+
+!ReceptiveAccount methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:03:32'!
+addedTo: aPortfolio 
+	
+	! !
+
+
 !ReceptiveAccount methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:35'!
 initialize
 
 	super initialize.
 	transactions := OrderedCollection new.! !
+
+
+!ReceptiveAccount methodsFor: 'reports' stamp: 'MYB 5/29/2022 23:24:02'!
+useReporter: aReporter
+	
+	^transactions do: [ :aTransaction | aTransaction useReporter: aReporter].! !
+
+
+!ReceptiveAccount methodsFor: 'testing' stamp: 'NR 10/21/2019 18:55:56'!
+hasRegistered: aTransaction
+
+	^ transactions includes: aTransaction 
+! !
+
+!ReceptiveAccount methodsFor: 'testing' stamp: 'HAW 5/25/2019 11:54:51'!
+isComposedBy: anAccount
+
+	^self = anAccount ! !
 
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'HAW 5/25/2019 11:38:52'!
@@ -1040,38 +1071,6 @@ register: aTransaction
 transactions 
 
 	^ transactions copy! !
-
-
-!ReceptiveAccount methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:24:46'!
-balance
-
-	^transactions 
-		inject: 0
-		into: [ :currentBalance :transaction | transaction affectBalance: currentBalance ]! !
-
-
-!ReceptiveAccount methodsFor: 'testing' stamp: 'NR 10/21/2019 18:55:56'!
-hasRegistered: aTransaction
-
-	^ transactions includes: aTransaction 
-! !
-
-!ReceptiveAccount methodsFor: 'testing' stamp: 'HAW 5/25/2019 11:54:51'!
-isComposedBy: anAccount
-
-	^self = anAccount ! !
-
-
-!ReceptiveAccount methodsFor: 'composition' stamp: 'HAW 5/25/2019 12:03:32'!
-addedTo: aPortfolio 
-	
-	! !
-
-
-!ReceptiveAccount methodsFor: 'reports' stamp: 'MYB 5/29/2022 23:24:02'!
-useReporter: aReporter
-	
-	^transactions do: [ :aTransaction | aTransaction useReporter: aReporter].! !
 
 
 !classDefinition: #AccountTransaction category: 'Portfolio-Solucion'!
@@ -1444,17 +1443,6 @@ Object subclass: #Transfer
 	poolDictionaries: ''
 	category: 'Portfolio-Solucion'!
 
-!Transfer methodsFor: 'initialization' stamp: 'id 5/28/2022 18:04:10'!
-initializeWith: aValue from: anOriginAccount to: aDestinationAccount
-
-	value := aValue.
-	withdrawLeg := WithdrawTransferLeg for: self.
-	depositLeg := DepositTransferLeg for: self.
-	
-	anOriginAccount register: withdrawLeg.
-	aDestinationAccount register: depositLeg.! !
-
-
 !Transfer methodsFor: 'accessing' stamp: 'id 5/28/2022 18:04:26'!
 depositLeg
 	
@@ -1469,6 +1457,17 @@ value
 withdrawLeg
 	
 	^withdrawLeg.! !
+
+
+!Transfer methodsFor: 'initialization' stamp: 'id 5/28/2022 18:04:10'!
+initializeWith: aValue from: anOriginAccount to: aDestinationAccount
+
+	value := aValue.
+	withdrawLeg := WithdrawTransferLeg for: self.
+	depositLeg := DepositTransferLeg for: self.
+	
+	anOriginAccount register: withdrawLeg.
+	aDestinationAccount register: depositLeg.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
