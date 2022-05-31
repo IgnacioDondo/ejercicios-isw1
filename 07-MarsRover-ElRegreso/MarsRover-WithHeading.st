@@ -1,30 +1,30 @@
-!classDefinition: #AlgoTest category: 'MarsRover-WithHeading'!
-TestCase subclass: #AlgoTest
+!classDefinition: #MarsRoverLoggerTest category: 'MarsRover-WithHeading'!
+TestCase subclass: #MarsRoverLoggerTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:15:27'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:41'!
 test01
 
 	| marsRover logger |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: ''.
 	
 	self assert: logger readStream atEnd.
 ! !
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:19:07'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:37'!
 test02
 
 	| marsRover logger logStream |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: 'f'.
 	
@@ -33,13 +33,13 @@ test02
 	self assert: logStream atEnd.
 ! !
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:27:10'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:32'!
 test03
 
 	| marsRover logger logStream |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: 'b'.
 	
@@ -48,13 +48,13 @@ test03
 	self assert: logStream atEnd.
 ! !
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:30:55'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:27'!
 test04
 
 	| marsRover logger logStream |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingEast.
-	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: 'fb'.
 	
@@ -64,13 +64,13 @@ test04
 	self assert: logStream atEnd.
 ! !
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:42:10'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:23'!
 test05
 
 	| marsRover logger logStream |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logger := MarsRoverLogger followHeadingChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: 'r'.
 	
@@ -79,13 +79,13 @@ test05
 	self assert: logStream atEnd.
 ! !
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:00:08'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:18'!
 test06
 
 	| marsRover logger logStream |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logger := MarsRoverLogger followHeadingChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: 'll'.
 	
@@ -95,18 +95,36 @@ test06
 	self assert: logStream atEnd.
 ! !
 
-!AlgoTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:09:00'!
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:02:12'!
 test07
 
 	| marsRover logger logStream |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logger := MarsRoverLogger followHeadingChangesOn: marsRover.
+	logger := MarsRoverLogger followChangesOn: marsRover.
 	
 	marsRover process: 'lr'.
 	
 	logStream := logger readStream.
 	self assert: 'West' equals: logStream nextLine.
+	self assert: 'North' equals: logStream nextLine.
+	self assert: logStream atEnd.
+! !
+
+!MarsRoverLoggerTest methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:01:31'!
+test08
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followChangesOn: marsRover.
+	
+	marsRover process: 'frbl'.
+	
+	logStream := logger readStream.
+	self assert: '1@2' equals: logStream nextLine.
+	self assert: 'East' equals: logStream nextLine.
+	self assert: '0@2' equals: logStream nextLine.
 	self assert: 'North' equals: logStream nextLine.
 	self assert: logStream atEnd.
 ! !
@@ -319,7 +337,7 @@ assertIsAt: newPosition heading: newHeadingType afterProcessing: commands whenSt
 
 !classDefinition: #MarsRover category: 'MarsRover-WithHeading'!
 Object subclass: #MarsRover
-	instanceVariableNames: 'position head positionLogger headingLogger'
+	instanceVariableNames: 'position head logger'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
@@ -363,11 +381,13 @@ headWest
 	
 	self rotateHeadingAndLogNewHeading: MarsRoverHeadingWest! !
 
-!MarsRover methodsFor: 'heading' stamp: 'MYB 5/30/2022 21:15:00'!
+!MarsRover methodsFor: 'heading' stamp: 'MYB 5/31/2022 18:58:54'!
 rotateHeadingAndLogNewHeading: aMarsRoverHeading
 
 	head := aMarsRoverHeading for: self.
-	headingLogger ifNotNil: [headingLogger headingChangedTo: head]! !
+	logger ifNotNil: [
+		logger headingChangedTo: head
+	]! !
 
 !MarsRover methodsFor: 'heading' stamp: 'HAW 10/7/2021 20:14:20'!
 rotateLeft
@@ -406,11 +426,13 @@ isRotateRightCommand: aCommand
 	^aCommand = $r! !
 
 
-!MarsRover methodsFor: 'moving' stamp: 'HAW 5/30/2022 20:38:44'!
+!MarsRover methodsFor: 'moving' stamp: 'MYB 5/31/2022 18:59:02'!
 addToPositionAndLogNewPosition: newPosition
 
 	position := position + newPosition.
-	positionLogger ifNotNil: [ positionLogger positionChangedTo: position ]! !
+	logger ifNotNil: [ 
+		logger positionChangedTo: position
+	]! !
 
 !MarsRover methodsFor: 'moving' stamp: 'HAW 10/7/2021 20:13:24'!
 moveBackward
@@ -463,15 +485,11 @@ processCommand: aCommand
 	self signalInvalidCommand.! !
 
 
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:43:32'!
-followHeadingChangesWith: aMarsRoverLogger 
+!MarsRover methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:00:54'!
+followChangesWith: aMarsRoverLogger 
 	
-	headingLogger := aMarsRoverLogger ! !
-
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:20:35'!
-followPositionChangesWith: aMarsRoverLogger 
-	
-	positionLogger := aMarsRoverLogger ! !
+	logger := aMarsRoverLogger.
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -690,15 +708,10 @@ Object subclass: #MarsRoverLogger
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:43:13'!
-followHeadingChangesOn: aMarsRover 
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:01:31'!
+followChangesOn: aMarsRover 
 	
-	aMarsRover followHeadingChangesWith: self! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:20:23'!
-followPositionChangesOn: aMarsRover 
-	
-	aMarsRover followPositionChangesWith: self! !
+	aMarsRover followChangesWith: self! !
 
 !MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:46:00'!
 headingChangedTo: aMarsRoverHeading
@@ -751,12 +764,7 @@ visitMarsRoverHeadingWest: aMarsRoverHeadingWest
 MarsRoverLogger class
 	instanceVariableNames: ''!
 
-!MarsRoverLogger class methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:42:45'!
-followHeadingChangesOn: aMarsRover 
+!MarsRoverLogger class methodsFor: 'instance creation' stamp: 'MYB 5/31/2022 19:01:31'!
+followChangesOn: aMarsRover 
 	
-	^self new followHeadingChangesOn: aMarsRover ! !
-
-!MarsRoverLogger class methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:16:11'!
-followPositionChangesOn: aMarsRover 
-	
-	^self new followPositionChangesOn: aMarsRover ! !
+	^self new followChangesOn: aMarsRover ! !
