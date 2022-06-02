@@ -653,6 +653,17 @@ visitMarsRoverHeadingWest: aMarsRoverHeadingWest
 	
 	self subclassResponsibility.! !
 
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarsRoverFollower class' category: 'MarsRover-WithHeading'!
+MarsRoverFollower class
+	instanceVariableNames: ''!
+
+!MarsRoverFollower class methodsFor: 'instance creation' stamp: 'id 6/1/2022 22:38:18'!
+followChangesOn: aMarsRover 
+	
+	^self new followChangesOn: aMarsRover.! !
+
 
 !classDefinition: #MarsRoverLogger category: 'MarsRover-WithHeading'!
 MarsRoverFollower subclass: #MarsRoverLogger
@@ -700,17 +711,6 @@ visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth
 visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
 	
 	self logHeadingChangeTo: 'West'! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'MarsRoverLogger class' category: 'MarsRover-WithHeading'!
-MarsRoverLogger class
-	instanceVariableNames: ''!
-
-!MarsRoverLogger class methodsFor: 'instance creation' stamp: 'MYB 5/31/2022 19:01:31'!
-followChangesOn: aMarsRover 
-	
-	^self new followChangesOn: aMarsRover ! !
 
 
 !classDefinition: #MarsRoverStateWindow category: 'MarsRover-WithHeading'!
@@ -760,17 +760,6 @@ visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth
 visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
 	
 	head := 'West'! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'MarsRoverStateWindow class' category: 'MarsRover-WithHeading'!
-MarsRoverStateWindow class
-	instanceVariableNames: ''!
-
-!MarsRoverStateWindow class methodsFor: 'instance creation' stamp: 'id 6/1/2022 21:26:32'!
-followChangesOn: aMarsRover 
-	
-	^self new followChangesOn: aMarsRover ! !
 
 
 !classDefinition: #MarsRoverHeading category: 'MarsRover-WithHeading'!
