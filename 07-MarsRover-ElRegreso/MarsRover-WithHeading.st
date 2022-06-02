@@ -137,85 +137,85 @@ TestCase subclass: #MarsRoverStateWindowTest
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:09:02'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test01
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: ''.
 	
 	self assert: logState currentHead equals: ''.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:09:02'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test02
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: 'r'.
 	
 	self assert: logState currentHead equals: 'East'.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:09:02'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test03
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: 'rl'.
 	
 	self assert: logState currentHead equals: 'North'.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:09:02'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test04
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: 'l'.
 	
 	self assert: logState currentHead equals: 'West'.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:09:02'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test05
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: 'll'.
 	
 	self assert: logState currentHead equals: 'South'.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:10:57'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test06
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: ''.
 	
 	self assert: logState currentPosition equals: ''.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'MYB 6/1/2022 16:17:40'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
 test07
 	
 	| marsRover logState |
 	
 	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
-	logState := MarsRoverStateWindow followStateOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
 	
 	marsRover process: 'f'.
 	
@@ -397,6 +397,22 @@ test16ForwardBackwardsAndRotateRightWorkAsExpectedWhenPointingWest
 		heading: self west 
 ! !
 
+!MarsRoverTest methodsFor: 'tests' stamp: 'id 6/1/2022 21:26:32'!
+test17MarsRoverCanHaveTwoFollowersAtTheSameTime
+
+	| marsRover logger logState logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followChangesOn: marsRover.
+	logState := MarsRoverStateWindow followChangesOn: marsRover.
+	
+	marsRover process: 'f'.
+	
+	logStream := logger readStream.
+	self assert: '1@2' equals: logStream nextLine.
+	self assert: logStream atEnd.
+	self assert: 1@2 equals: logState currentPosition.! !
+
 
 !MarsRoverTest methodsFor: 'headings' stamp: 'HAW 10/7/2021 20:09:31'!
 east
@@ -433,7 +449,7 @@ assertIsAt: newPosition heading: newHeadingType afterProcessing: commands whenSt
 
 !classDefinition: #MarsRover category: 'MarsRover-WithHeading'!
 Object subclass: #MarsRover
-	instanceVariableNames: 'position head logger stateWindow'
+	instanceVariableNames: 'position head followers'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
@@ -449,11 +465,12 @@ signalInvalidCommand
 	self error: self invalidCommandErrorDescription ! !
 
 
-!MarsRover methodsFor: 'initialization' stamp: 'HAW 10/7/2021 20:10:49'!
+!MarsRover methodsFor: 'initialization' stamp: 'id 6/1/2022 21:19:52'!
 initializeAt: aPosition heading: aHeadingType
 
 	position := aPosition.
-	head := aHeadingType for: self ! !
+	head := aHeadingType for: self.
+	followers := OrderedCollection new.! !
 
 
 !MarsRover methodsFor: 'heading' stamp: 'MYB 5/30/2022 21:15:00'!
@@ -477,16 +494,11 @@ headWest
 	
 	self rotateHeadingAndLogNewHeading: MarsRoverHeadingWest! !
 
-!MarsRover methodsFor: 'heading' stamp: 'MYB 6/1/2022 15:52:08'!
+!MarsRover methodsFor: 'heading' stamp: 'id 6/1/2022 21:34:32'!
 rotateHeadingAndLogNewHeading: aMarsRoverHeading
 
 	head := aMarsRoverHeading for: self.
-	logger ifNotNil: [
-		logger headingChangedTo: head
-	].
-	stateWindow ifNotNil: [
-		stateWindow headingChangedTo: head
-	]! !
+	followers do: [ :aFollower | aFollower headingChangedTo: head. ].! !
 
 !MarsRover methodsFor: 'heading' stamp: 'HAW 10/7/2021 20:14:20'!
 rotateLeft
@@ -525,16 +537,11 @@ isRotateRightCommand: aCommand
 	^aCommand = $r! !
 
 
-!MarsRover methodsFor: 'moving' stamp: 'MYB 6/1/2022 16:14:16'!
+!MarsRover methodsFor: 'moving' stamp: 'id 6/1/2022 21:34:19'!
 addToPositionAndLogNewPosition: newPosition
 
 	position := position + newPosition.
-	logger ifNotNil: [ 
-		logger positionChangedTo: position
-	].
-	stateWindow ifNotNil: [ 
-		stateWindow positionChangedTo: position
-	]! !
+	followers do: [ :aFollower | aFollower positionChangedTo: position. ].! !
 
 !MarsRover methodsFor: 'moving' stamp: 'HAW 10/7/2021 20:13:24'!
 moveBackward
@@ -587,17 +594,10 @@ processCommand: aCommand
 	self signalInvalidCommand.! !
 
 
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:00:54'!
-followChangesWith: aMarsRoverLogger 
-	
-	logger := aMarsRoverLogger.
-! !
+!MarsRover methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:18:55'!
+accept: aVisitor
 
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 15:48:33'!
-followStateWith: aMarsRoverStateWindow 
-	
-	stateWindow := aMarsRoverStateWindow.
-! !
+	followers add: aVisitor.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -609,6 +609,168 @@ MarsRover class
 at: aPosition heading: aHeadingType
 	
 	^self new initializeAt: aPosition heading: aHeadingType! !
+
+
+!classDefinition: #MarsRoverFollower category: 'MarsRover-WithHeading'!
+Object subclass: #MarsRoverFollower
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MarsRover-WithHeading'!
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:27:02'!
+followChangesOn: aMarsRover 
+	
+	aMarsRover accept: self.! !
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:27:37'!
+headingChangedTo: aMarsRoverHeading
+	
+	aMarsRoverHeading accept: self.! !
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:28:35'!
+positionChangedTo: aPosition
+
+	self subclassResponsibility.! !
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:29:45'!
+visitMarsRoverHeadingEast: aMarsRoverHeadingEast 
+	
+	self subclassResponsibility.! !
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:29:58'!
+visitMarsRoverHeadingNorth: aMarsRoverHeadingNorth 
+	
+	self subclassResponsibility.! !
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:30:07'!
+visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth
+	
+	self subclassResponsibility.! !
+
+!MarsRoverFollower methodsFor: 'as yet unclassified' stamp: 'id 6/1/2022 21:30:14'!
+visitMarsRoverHeadingWest: aMarsRoverHeadingWest
+	
+	self subclassResponsibility.! !
+
+
+!classDefinition: #MarsRoverLogger category: 'MarsRover-WithHeading'!
+MarsRoverFollower subclass: #MarsRoverLogger
+	instanceVariableNames: 'log'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MarsRover-WithHeading'!
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:25:00'!
+initialize
+
+	log  := WriteStream on: ''! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:20:50'!
+logHeadingChangeTo: newHeading
+
+	log nextPutAll: newHeading; newLine! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:22:16'!
+positionChangedTo: aPosition
+
+	log print: aPosition; newLine! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:23:26'!
+readStream
+	
+	^ReadStream on: log contents ! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:19:06'!
+visitMarsRoverHeadingEast: aMarsRoverHeadingEast 
+	
+	self logHeadingChangeTo: 'East'! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:19:34'!
+visitMarsRoverHeadingNorth: aMarsRoverHeadingNorth 
+	
+	self logHeadingChangeTo: 'North'! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:19:56'!
+visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth
+	
+	self logHeadingChangeTo: 'South'! !
+
+!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:20:07'!
+visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
+	
+	self logHeadingChangeTo: 'West'! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarsRoverLogger class' category: 'MarsRover-WithHeading'!
+MarsRoverLogger class
+	instanceVariableNames: ''!
+
+!MarsRoverLogger class methodsFor: 'instance creation' stamp: 'MYB 5/31/2022 19:01:31'!
+followChangesOn: aMarsRover 
+	
+	^self new followChangesOn: aMarsRover ! !
+
+
+!classDefinition: #MarsRoverStateWindow category: 'MarsRover-WithHeading'!
+MarsRoverFollower subclass: #MarsRoverStateWindow
+	instanceVariableNames: 'head position'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MarsRover-WithHeading'!
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:09:02'!
+currentHead
+	
+	^head! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:15:57'!
+currentPosition
+	
+	^position! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:15:42'!
+initialize
+	
+	head := ''.
+	position := ''.! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:15:09'!
+positionChangedTo: aPoint 
+	
+	position := aPoint! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 15:58:59'!
+visitMarsRoverHeadingEast: aMarsRoverHeadingEast
+	
+	head := 'East'! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:05:34'!
+visitMarsRoverHeadingNorth: aMarsRoverHeadingNorth 
+	
+	head := 'North'! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:06:52'!
+visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth 
+	
+	head := 'South'! !
+
+!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:06:27'!
+visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
+	
+	head := 'West'! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarsRoverStateWindow class' category: 'MarsRover-WithHeading'!
+MarsRoverStateWindow class
+	instanceVariableNames: ''!
+
+!MarsRoverStateWindow class methodsFor: 'instance creation' stamp: 'id 6/1/2022 21:26:32'!
+followChangesOn: aMarsRover 
+	
+	^self new followChangesOn: aMarsRover ! !
 
 
 !classDefinition: #MarsRoverHeading category: 'MarsRover-WithHeading'!
@@ -807,142 +969,3 @@ rotateRight
 accept: aVisitor 
 	
 	^aVisitor visitMarsRoverHeadingWest: self! !
-
-
-!classDefinition: #MarsRoverLogger category: 'MarsRover-WithHeading'!
-Object subclass: #MarsRoverLogger
-	instanceVariableNames: 'log'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MarsRover-WithHeading'!
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/31/2022 19:01:31'!
-followChangesOn: aMarsRover 
-	
-	aMarsRover followChangesWith: self! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:46:00'!
-headingChangedTo: aMarsRoverHeading
-	
-	aMarsRoverHeading accept: self! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:25:00'!
-initialize
-
-	log  := WriteStream on: ''! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:20:50'!
-logHeadingChangeTo: newHeading
-
-	log nextPutAll: newHeading; newLine! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:22:16'!
-positionChangedTo: aPosition
-
-	log print: aPosition; newLine! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'HAW 5/30/2022 20:23:26'!
-readStream
-	
-	^ReadStream on: log contents ! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:19:06'!
-visitMarsRoverHeadingEast: aMarsRoverHeadingEast 
-	
-	self logHeadingChangeTo: 'East'! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:19:34'!
-visitMarsRoverHeadingNorth: aMarsRoverHeadingNorth 
-	
-	self logHeadingChangeTo: 'North'! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:19:56'!
-visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth
-	
-	self logHeadingChangeTo: 'South'! !
-
-!MarsRoverLogger methodsFor: 'as yet unclassified' stamp: 'MYB 5/30/2022 21:20:07'!
-visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
-	
-	self logHeadingChangeTo: 'West'! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'MarsRoverLogger class' category: 'MarsRover-WithHeading'!
-MarsRoverLogger class
-	instanceVariableNames: ''!
-
-!MarsRoverLogger class methodsFor: 'instance creation' stamp: 'MYB 5/31/2022 19:01:31'!
-followChangesOn: aMarsRover 
-	
-	^self new followChangesOn: aMarsRover ! !
-
-
-!classDefinition: #MarsRoverStateWindow category: 'MarsRover-WithHeading'!
-Object subclass: #MarsRoverStateWindow
-	instanceVariableNames: 'head position'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MarsRover-WithHeading'!
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:09:02'!
-currentHead
-	
-	^head! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:15:57'!
-currentPosition
-	
-	^position! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 15:47:23'!
-followStateOn: aMarsRover 
-	
-	aMarsRover followStateWith: self! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 15:56:27'!
-headingChangedTo: aMarsRoverHeading 
-	
-	aMarsRoverHeading accept: self! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:15:42'!
-initialize
-	
-	head := ''.
-	position := ''.! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:15:09'!
-positionChangedTo: aPoint 
-	
-	position := aPoint! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 15:58:59'!
-visitMarsRoverHeadingEast: aMarsRoverHeadingEast
-	
-	head := 'East'! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:05:34'!
-visitMarsRoverHeadingNorth: aMarsRoverHeadingNorth 
-	
-	head := 'North'! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:06:52'!
-visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth 
-	
-	head := 'South'! !
-
-!MarsRoverStateWindow methodsFor: 'as yet unclassified' stamp: 'MYB 6/1/2022 16:06:27'!
-visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
-	
-	head := 'West'! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'MarsRoverStateWindow class' category: 'MarsRover-WithHeading'!
-MarsRoverStateWindow class
-	instanceVariableNames: ''!
-
-!MarsRoverStateWindow class methodsFor: 'instance creation' stamp: 'MYB 6/1/2022 15:40:10'!
-followStateOn: aMarsRover 
-	
-	^self new followStateOn: aMarsRover ! !
