@@ -129,6 +129,93 @@ test08LoggerLogsChangesWhenMarsRoverMovesAndRotatesMultipleTimes
 	self assert: logStream atEnd.
 ! !
 
+!MarsRoverLoggerTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:28:38'!
+test09PositionLoggerDoesNotLogHeadingChanges
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+	
+	marsRover process: 'r'.
+	
+	logStream := logger readStream.
+	self assert: logStream atEnd.! !
+
+!MarsRoverLoggerTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:33:53'!
+test10PositionLoggerLogsChangesWhenMarsRoverMovesForwards
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+
+	marsRover process: 'f'.
+
+	logStream := logger readStream.
+	self assert: '1@2' equals: logStream nextLine.
+	self assert: logStream atEnd.! !
+
+!MarsRoverLoggerTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:37:11'!
+test11PositionLoggerLogsChangesWhenMarsRoverMovesMultipleTimes
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followPositionChangesOn: marsRover.
+
+	marsRover process: 'ffb'.
+
+	logStream := logger readStream.
+	self assert: '1@2' equals: logStream nextLine.
+	self assert: '1@3' equals: logStream nextLine.
+	self assert: '1@2' equals: logStream nextLine.
+	self assert: logStream atEnd.! !
+
+!MarsRoverLoggerTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:38:46'!
+test12HeadingLoggerDoesNotLogPositionChanges
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followHeadingChangesOn: marsRover.
+	
+	marsRover process: 'f'.
+	
+	logStream := logger readStream.
+	self assert: logStream atEnd.! !
+
+!MarsRoverLoggerTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:41:22'!
+test13HeadingLoggerLogsChangesWhenMarsRoverRotatesRight
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followHeadingChangesOn: marsRover.
+
+	marsRover process: 'r'.
+
+	logStream := logger readStream.
+	self assert: 'East' equals: logStream nextLine.
+	self assert: logStream atEnd.! !
+
+!MarsRoverLoggerTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:43:28'!
+test14HeadingLoggerLogsChangesWhenMarsRoverRotatesMultipleTimes
+
+	| marsRover logger logStream |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logger := MarsRoverLogger followHeadingChangesOn: marsRover.
+
+	marsRover process: 'rlll'.
+
+	logStream := logger readStream.
+	self assert: 'East' equals: logStream nextLine.
+	self assert: 'North' equals: logStream nextLine.
+	self assert: 'West' equals: logStream nextLine.
+	self assert: 'South' equals: logStream nextLine.
+	self assert: logStream atEnd.! !
+
 
 !classDefinition: #MarsRoverStateWindowTest category: 'MarsRover-WithHeading'!
 TestCase subclass: #MarsRoverStateWindowTest
@@ -136,6 +223,32 @@ TestCase subclass: #MarsRoverStateWindowTest
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
+
+!MarsRoverStateWindowTest methodsFor: 'auxiliary' stamp: 'id 6/2/2022 02:45:35'!
+eastWording
+
+	^self pointingToWording: 'Este'.! !
+
+!MarsRoverStateWindowTest methodsFor: 'auxiliary' stamp: 'id 6/2/2022 02:45:28'!
+northWording
+
+	^self pointingToWording: 'Norte'.! !
+
+!MarsRoverStateWindowTest methodsFor: 'auxiliary' stamp: 'id 6/2/2022 02:44:56'!
+pointingToWording: aHeading
+
+	^'Apuntando al ' , aHeading.! !
+
+!MarsRoverStateWindowTest methodsFor: 'auxiliary' stamp: 'id 6/2/2022 02:45:21'!
+southWording
+
+	^self pointingToWording: 'Sur'.! !
+
+!MarsRoverStateWindowTest methodsFor: 'auxiliary' stamp: 'id 6/2/2022 02:44:50'!
+westWording
+
+	^self pointingToWording: 'Oeste'.! !
+
 
 !MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:20:08'!
 test01StateWindowDoesNotSetHeadChangesWhenMarsRoverDoesNotMoveNorRotate
@@ -149,7 +262,7 @@ test01StateWindowDoesNotSetHeadChangesWhenMarsRoverDoesNotMoveNorRotate
 	
 	self assert: logState currentHead equals: ''.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:20:15'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 02:41:40'!
 test02StateWindowSetsHeadChangesWhenMarsRoverRotatesRight
 	
 	| marsRover logState |
@@ -159,9 +272,9 @@ test02StateWindowSetsHeadChangesWhenMarsRoverRotatesRight
 	
 	marsRover process: 'r'.
 	
-	self assert: logState currentHead equals: 'East'.! !
+	self assert: self eastWording equals: logState currentHead.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:20:23'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 02:42:04'!
 test03StateWindowSetsHeadChangesWhenMarsRoverRotatesLeft
 	
 	| marsRover logState |
@@ -171,9 +284,9 @@ test03StateWindowSetsHeadChangesWhenMarsRoverRotatesLeft
 	
 	marsRover process: 'l'.
 	
-	self assert: logState currentHead equals: 'West'.! !
+	self assert: self westWording equals: logState currentHead.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:20:30'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 02:42:17'!
 test04StateWindowSetsHeadChangesWhenMarsRoverRotatesAndRotatesBackToOriginalHeading
 	
 	| marsRover logState |
@@ -183,9 +296,9 @@ test04StateWindowSetsHeadChangesWhenMarsRoverRotatesAndRotatesBackToOriginalHead
 	
 	marsRover process: 'rl'.
 	
-	self assert: logState currentHead equals: 'North'.! !
+	self assert: self northWording equals: logState currentHead.! !
 
-!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:20:59'!
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 02:42:28'!
 test05StateWindowSetsHeadChangesWhenMarsRoverRotatesMultipleTimes
 	
 	| marsRover logState |
@@ -195,7 +308,7 @@ test05StateWindowSetsHeadChangesWhenMarsRoverRotatesMultipleTimes
 	
 	marsRover process: 'll'.
 	
-	self assert: logState currentHead equals: 'South'.! !
+	self assert: self southWording equals: logState currentHead.! !
 
 !MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:21:40'!
 test06StateWindowDoesNotSetPositionChangesWhenMarsRoverDoesNotMove
@@ -224,6 +337,58 @@ test07StateWindowSetsPositionChangesWhenMarsRoverDoesMoves
 	marsRover process: 'b'.
 	
 	self assert: logState currentPosition equals: 1@1.! !
+
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:50:19'!
+test08PositionStateWindowDoesNotSetPositionChangesNorHeadingChangesWhenMarsRoverRotated
+
+	| marsRover logState |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logState := MarsRoverStateWindow followPositionChangesOn: marsRover.
+	
+	marsRover process: 'r'.
+	
+	self assert: '' equals: logState currentHead.
+	self assert: '' equals: logState currentPosition.! !
+
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 01:51:13'!
+test09PositionStateWindowSetsPositionChangesAndDoesNotSetHeadingChangesWhenMarsRoverMoved
+
+	| marsRover logState |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logState := MarsRoverStateWindow followPositionChangesOn: marsRover.
+	
+	marsRover process: 'f'.
+	
+	self assert: '' equals: logState currentHead.
+	self assert: 1@2 equals: logState currentPosition.! !
+
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 02:15:23'!
+test10HeadingStateWindowDoesNotSetPositionChangesNorHeadingChangesWhenMarsRoverMoved
+
+	| marsRover logState |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logState := MarsRoverStateWindow followHeadingChangesOn: marsRover.
+	
+	marsRover process: 'f'.
+	
+	self assert: '' equals: logState currentHead.
+	self assert: '' equals: logState currentPosition.! !
+
+!MarsRoverStateWindowTest methodsFor: 'tests' stamp: 'id 6/2/2022 02:41:40'!
+test11HeadingStateWindowSetsHeadingChangesAndDoesNotSetPositionChangesWhenMarsRoverRotated
+
+	| marsRover logState |
+	
+	marsRover := MarsRover at: 1@1 heading: MarsRoverHeadingNorth.
+	logState := MarsRoverStateWindow followHeadingChangesOn: marsRover.
+
+	marsRover process: 'r'.
+
+	self assert: self eastWording equals: logState currentHead.
+	self assert: '' equals: logState currentPosition.! !
 
 
 !classDefinition: #MarsRoverTest category: 'MarsRover-WithHeading'!
@@ -449,7 +614,7 @@ assertIsAt: newPosition heading: newHeadingType afterProcessing: commands whenSt
 
 !classDefinition: #MarsRover category: 'MarsRover-WithHeading'!
 Object subclass: #MarsRover
-	instanceVariableNames: 'position head followers'
+	instanceVariableNames: 'position head positionFollowers headingFollowers'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
@@ -503,11 +668,11 @@ headWest
 	
 	self rotateHeadingAndLogNewHeading: MarsRoverHeadingWest! !
 
-!MarsRover methodsFor: 'heading' stamp: 'id 6/1/2022 21:34:32'!
+!MarsRover methodsFor: 'heading' stamp: 'id 6/2/2022 02:22:34'!
 rotateHeadingAndLogNewHeading: aMarsRoverHeading
 
 	head := aMarsRoverHeading for: self.
-	followers do: [ :aFollower | aFollower headingChangedTo: head. ].! !
+	headingFollowers do: [ :aFollower | aFollower headingChangedTo: head. ].! !
 
 !MarsRover methodsFor: 'heading' stamp: 'HAW 10/7/2021 20:14:20'!
 rotateLeft
@@ -520,19 +685,21 @@ rotateRight
 	head rotateRight! !
 
 
-!MarsRover methodsFor: 'initialization' stamp: 'id 6/1/2022 21:19:52'!
+!MarsRover methodsFor: 'initialization' stamp: 'id 6/2/2022 02:22:57'!
 initializeAt: aPosition heading: aHeadingType
 
 	position := aPosition.
 	head := aHeadingType for: self.
-	followers := OrderedCollection new.! !
+
+	positionFollowers := OrderedCollection new.
+	headingFollowers := OrderedCollection new.! !
 
 
-!MarsRover methodsFor: 'moving' stamp: 'id 6/1/2022 21:34:19'!
+!MarsRover methodsFor: 'moving' stamp: 'id 6/2/2022 02:22:19'!
 addToPositionAndLogNewPosition: newPosition
 
 	position := position + newPosition.
-	followers do: [ :aFollower | aFollower positionChangedTo: position. ].! !
+	positionFollowers do: [ :aFollower | aFollower positionChangedTo: position. ].! !
 
 !MarsRover methodsFor: 'moving' stamp: 'HAW 10/7/2021 20:13:24'!
 moveBackward
@@ -594,10 +761,21 @@ isRotateRightCommand: aCommand
 	^aCommand = $r! !
 
 
-!MarsRover methodsFor: 'visitors' stamp: 'id 6/1/2022 21:18:55'!
+!MarsRover methodsFor: 'visitors' stamp: 'id 6/2/2022 03:07:46'!
 accept: aVisitor
 
-	followers add: aVisitor.! !
+	self acceptPositionFollower: aVisitor.
+	self acceptHeadingFollower: aVisitor.! !
+
+!MarsRover methodsFor: 'visitors' stamp: 'id 6/2/2022 01:40:23'!
+acceptHeadingFollower: aMarsRoverFollower
+
+	headingFollowers add: aMarsRoverFollower.! !
+
+!MarsRover methodsFor: 'visitors' stamp: 'id 6/2/2022 01:32:10'!
+acceptPositionFollower: aMarsRoverFollower 
+	
+	positionFollowers add: aMarsRoverFollower.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -634,6 +812,16 @@ followChangesOn: aMarsRover
 	
 	aMarsRover accept: self.! !
 
+!MarsRoverFollower methodsFor: 'visiting' stamp: 'id 6/2/2022 02:19:04'!
+followHeadingChangesOn: aMarsRover 
+
+	aMarsRover acceptHeadingFollower: self.! !
+
+!MarsRoverFollower methodsFor: 'visiting' stamp: 'id 6/2/2022 02:19:54'!
+followPositionChangesOn: aMarsRover 
+
+	aMarsRover acceptPositionFollower: self.! !
+
 !MarsRoverFollower methodsFor: 'visiting' stamp: 'id 6/1/2022 21:29:45'!
 visitMarsRoverHeadingEast: aMarsRoverHeadingEast 
 	
@@ -664,6 +852,16 @@ MarsRoverFollower class
 followChangesOn: aMarsRover 
 	
 	^self new followChangesOn: aMarsRover.! !
+
+!MarsRoverFollower class methodsFor: 'instance creation' stamp: 'id 6/2/2022 03:08:57'!
+followHeadingChangesOn: aMarsRover 
+	
+	self subclassResponsibility.! !
+
+!MarsRoverFollower class methodsFor: 'instance creation' stamp: 'id 6/2/2022 03:09:08'!
+followPositionChangesOn: aMarsRover
+	
+	self subclassResponsibility.! !
 
 
 !classDefinition: #MarsRoverLogger category: 'MarsRover-WithHeading'!
@@ -715,6 +913,22 @@ visitMarsRoverHeadingWest: aMarsRoverHeadingWest
 	
 	self logHeadingChangeTo: 'West'! !
 
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarsRoverLogger class' category: 'MarsRover-WithHeading'!
+MarsRoverLogger class
+	instanceVariableNames: ''!
+
+!MarsRoverLogger class methodsFor: 'instance creation' stamp: 'id 6/2/2022 01:39:16'!
+followHeadingChangesOn: aMarsRover 
+	
+	^self new followHeadingChangesOn: aMarsRover.! !
+
+!MarsRoverLogger class methodsFor: 'instance creation' stamp: 'id 6/2/2022 01:29:34'!
+followPositionChangesOn: aMarsRover
+	
+	^self new followPositionChangesOn: aMarsRover.! !
+
 
 !classDefinition: #MarsRoverStateWindow category: 'MarsRover-WithHeading'!
 MarsRoverFollower subclass: #MarsRoverStateWindow
@@ -747,25 +961,47 @@ positionChangedTo: aPoint
 	position := aPoint! !
 
 
-!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'MYB 6/1/2022 15:58:59'!
+!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'id 6/2/2022 02:37:07'!
 visitMarsRoverHeadingEast: aMarsRoverHeadingEast
 	
-	head := 'East'! !
+	self setHeadingTo: 'Este'.! !
 
-!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'MYB 6/1/2022 16:05:34'!
+!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'id 6/2/2022 02:37:02'!
 visitMarsRoverHeadingNorth: aMarsRoverHeadingNorth 
 	
-	head := 'North'! !
+	self setHeadingTo: 'Norte'.! !
 
-!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'MYB 6/1/2022 16:06:52'!
+!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'id 6/2/2022 02:36:56'!
 visitMarsRoverHeadingSouth: aMarsRoverHeadingSouth 
 	
-	head := 'South'! !
+	self setHeadingTo: 'Sur'.! !
 
-!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'MYB 6/1/2022 16:06:27'!
+!MarsRoverStateWindow methodsFor: 'visiting' stamp: 'id 6/2/2022 02:36:49'!
 visitMarsRoverHeadingWest: aMarsRoverHeadingWest 
 	
-	head := 'West'! !
+	self setHeadingTo: 'Oeste'.! !
+
+
+!MarsRoverStateWindow methodsFor: 'visiting - private' stamp: 'id 6/2/2022 02:37:29'!
+setHeadingTo: aHeading
+
+	^head := 'Apuntando al ' , aHeading.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarsRoverStateWindow class' category: 'MarsRover-WithHeading'!
+MarsRoverStateWindow class
+	instanceVariableNames: ''!
+
+!MarsRoverStateWindow class methodsFor: 'instance creation' stamp: 'id 6/2/2022 02:30:58'!
+followHeadingChangesOn: aMarsRover 
+	
+	^self new followHeadingChangesOn: aMarsRover.! !
+
+!MarsRoverStateWindow class methodsFor: 'instance creation' stamp: 'id 6/2/2022 01:47:37'!
+followPositionChangesOn: aMarsRover
+
+	^self new followPositionChangesOn: aMarsRover.! !
 
 
 !classDefinition: #MarsRoverHeading category: 'MarsRover-WithHeading'!
