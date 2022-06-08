@@ -47,6 +47,11 @@ createMerchantProcessor
 
 	^MerchantProcessorSimulator new.! !
 
+!TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'id 6/8/2022 19:48:16'!
+createSalesBook
+
+	^Dictionary new.! !
+
 !TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'MYB 6/7/2022 23:00:48'!
 createValidCreditCard
 
@@ -270,64 +275,60 @@ test17CartWithBooksKnowsItsTotalPrice
 	self assert: 14 equals: cart totalPrice.! !
 
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:06:55'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 20:10:33'!
 test24CashierCannotCheckoutAnEmptyCart
 
-	| cart cashier creditCard  merchantProcessorSimulator |
+	| cart cashier creditCard  merchantProcessorSimulator salesBook |
 	
 	merchantProcessorSimulator := self createMerchantProcessor.
-
 	cart := self createCart.
 	cashier := self createCashierWithMerchantProcessor: merchantProcessorSimulator.
 	creditCard := self createValidCreditCard.
+	salesBook := self createSalesBook.
 
 	self 
-		should: [ cashier checkout: cart andDebitFrom: creditCard. ]
+		should: [ cashier checkout: cart debitFrom: creditCard andRegisterOn: salesBook. ]
 		raise: Error 
 		withExceptionDo: 
 		[ :error |
 			self 
 				assert: Cashier cannotCheckoutAnEmptyCart
 				equals: error messageText.
-			self deny: (merchantProcessorSimulator hasBeenCalled).
+			self deny: (merchantProcessorSimulator hasBeenRequested).
 		].! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:19:33'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 20:10:33'!
 test25CashierCannotDebitFromAnExpiredCreditCard
 
-	| cart cashier creditCard merchantProcessorSimulator |
+	| cart cashier creditCard merchantProcessorSimulator salesBook |
 	
 	merchantProcessorSimulator := self createMerchantProcessor.
-	
 	cart := self createCartWithSomeBooks.
-	
 	cashier := self createCashierWithMerchantProcessor: merchantProcessorSimulator.
-
 	creditCard := self createExpiredCreditCard.
+	salesBook := self createSalesBook.
 
-	self 
-		should: [ cashier checkout: cart andDebitFrom: creditCard ] 
+	self
+		should: [ cashier checkout: cart debitFrom: creditCard andRegisterOn: salesBook. ]
 		raise: Error 
 		withExceptionDo: 
 		[ :error |
 			self 
 				assert: Cashier cannotDebitFromAnExpiredCard
 				equals: error messageText.
-			self deny: (merchantProcessorSimulator hasBeenCalled).
+			self deny: (merchantProcessorSimulator hasBeenRequested).
 		].! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:19:39'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 20:10:51'!
 test26CashierDebitsFromCreditCardWhenCardIsNotExpiredAndCartHasItems
 
-	| cart cashier creditCard expectedArguments merchantProcessorSimulator |
+	| cart cashier creditCard expectedArguments merchantProcessorSimulator salesBook |
 	
 	merchantProcessorSimulator := self createMerchantProcessor.
-	
 	cart := self createCartWithSomeBooks.
-	
-	cashier := self createCashierWithMerchantProcessor: merchantProcessorSimulator.
-	
+	cashier := self createCashierWithMerchantProcessor: merchantProcessorSimulator.	
 	creditCard := self createValidCreditCard.
+	salesBook := self createSalesBook.
 	
 	expectedArguments := Dictionary new.
 	expectedArguments add: 'creditCardNumber'->creditCard cardNumber.
@@ -335,49 +336,47 @@ test26CashierDebitsFromCreditCardWhenCardIsNotExpiredAndCartHasItems
 	expectedArguments add: 'creditCardOwner'->creditCard cardOwner.
 	expectedArguments add: 'transactionAmout'->cart totalPrice.
 
-	cashier checkout: cart andDebitFrom: creditCard.
+	cashier checkout: cart debitFrom: creditCard andRegisterOn: salesBook.
 
-	self assert: (merchantProcessorSimulator hasBeenCalledWith: expectedArguments).
+	self assert: (merchantProcessorSimulator hasBeenRequestedWith: expectedArguments).
 	
 	
 	! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:19:45'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 19:39:19'!
 test27CashierDebitsFromCreditCardOnlyOneTime
 
-	| cart cashier creditCard merchantProcessorSimulator |
+	| cart cashier creditCard merchantProcessorSimulator salesBook |
 	
 	merchantProcessorSimulator := self createMerchantProcessor.
-	
 	cart := self createCartWithSomeBooks.
-
 	cashier := self createCashierWithMerchantProcessor: merchantProcessorSimulator.
-	
 	creditCard := self createValidCreditCard.
+	salesBook := self createSalesBook.
 
-	cashier checkout: cart andDebitFrom: creditCard.
+	cashier checkout: cart debitFrom: creditCard andRegisterOn: salesBook.
 
 	self assert: 1 equals: (merchantProcessorSimulator numberOfRequests).
 	
 	
 	! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:45:37'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 19:35:55'!
 test28SalesBookIsEmptyWhenCreated
 
 	| salesBook |
-	salesBook := OrderedCollection new.
+	salesBook := self createSalesBook.
 	
 	self assert: salesBook isEmpty.
 	
 	
 	! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:44:45'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 19:35:55'!
 test29SalesBookIsNotEmptyWhenCashierMakeSales
 
 	| salesBook cart cashier creditCard |
-	salesBook := OrderedCollection new.
+	salesBook := self createSalesBook.
 	
 	cart := self createCartWithSomeBooks.
 	
@@ -392,26 +391,57 @@ test29SalesBookIsNotEmptyWhenCashierMakeSales
 	
 	! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'MYB 6/7/2022 23:52:48'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 19:47:32'!
 test30SalesBookRegisterSaleWhenCheckoutIsMade
 
-	| salesBook cart cashier creditCard expectedSaleInformation |
-	salesBook := OrderedCollection new.
+	| salesBook cart cashier creditCard expectedSaleInformation client clientSales |
 	
+	salesBook := self createSalesBook.
 	cart := self createCartWithSomeBooks.
-	
 	cashier := self createCashier.
-	
 	creditCard := self createValidCreditCard.
 	
 	cashier checkout: cart debitFrom: creditCard andRegisterOn: salesBook.
 	
+	client := creditCard cardOwner.
+	clientSales := OrderedCollection new.
+	
 	expectedSaleInformation := Dictionary new.
-	expectedSaleInformation add: 'items'->cart items; add: 'client'->creditCard cardOwner; add: 'totalPrice'->cart totalPrice.
+	expectedSaleInformation add: 'items'->cart items; add: 'totalPrice'->cart totalPrice.
 	
-	self assert: ((salesBook at: 1) = expectedSaleInformation).
+	clientSales add: expectedSaleInformation.
+
+	self assert: ((salesBook at: client) = clientSales).
 	
+	! !
+
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/8/2022 19:57:18'!
+test31SalesBookRegistersMultipleSalesWhenMultipleCheckoutsAreMade
+
+	| salesBook cart1 cart2 cashier creditCard expectedSaleInformation1 expectedSaleInformation2 client clientSales |
 	
+	salesBook := self createSalesBook.
+	cart1 := self createCartWithSomeBooks.
+	cart2 := self createCartWithSomeBooks.
+	cart2 addBook: book4 withOccurrences: 4.
+	cashier := self createCashier.
+	creditCard := self createValidCreditCard.
+	
+	cashier checkout: cart1 debitFrom: creditCard andRegisterOn: salesBook.
+	cashier checkout: cart2 debitFrom: creditCard andRegisterOn: salesBook.
+	
+	client := creditCard cardOwner.
+	clientSales := OrderedCollection new.
+	
+	expectedSaleInformation1 := Dictionary new.
+	expectedSaleInformation1 add: 'items'->cart1 items; add: 'totalPrice'->cart1 totalPrice.
+	expectedSaleInformation2 := Dictionary new.
+	expectedSaleInformation2 add: 'items'->cart2 items; add: 'totalPrice'->cart2 totalPrice.
+
+	clientSales add: expectedSaleInformation1.
+	clientSales add: expectedSaleInformation2.
+
+	self assert: ((salesBook at: client) = clientSales).
 	! !
 
 
@@ -647,29 +677,35 @@ initializeWithDate: aDate merchantProcessor: aMerchantProcessor
 	merchantProcessor := aMerchantProcessor.! !
 
 
-!Cashier methodsFor: 'operations' stamp: 'id 6/7/2022 21:47:39'!
-checkout: aCart andDebitFrom: aCreditCard
+!Cashier methodsFor: 'operations' stamp: 'id 6/8/2022 20:09:30'!
+checkout: aCart debitFrom: aCreditCard andRegisterOn: aSalesBook
+
+	self assertCanCheckout: aCreditCard debitingFrom: aCart.
+
+	merchantProcessor debit: (aCart totalPrice) from: aCreditCard.
+
+	self registerCheckoutOf: aCart debitedFrom: aCreditCard on: aSalesBook.! !
+
+
+!Cashier methodsFor: 'operations - private' stamp: 'id 6/8/2022 20:04:04'!
+assertCanCheckout: aCreditCard debitingFrom: aCart
 
 	self assertCartIsNotEmpty: aCart.
-	self assertCreditCardIsNotExpired: aCreditCard.
-	
-	merchantProcessor debit: (aCart totalPrice) from: aCreditCard.! !
+	self assertCreditCardIsNotExpired: aCreditCard! !
 
-!Cashier methodsFor: 'operations' stamp: 'MYB 6/7/2022 23:45:06'!
-checkout: aCart debitFrom: aCreditCard andRegisterOn: aSalesBook 
-	
-	| totalPrice sale |
-	self assertCartIsNotEmpty: aCart.
-	self assertCreditCardIsNotExpired: aCreditCard.
-	
-	totalPrice := aCart totalPrice.
-	
-	merchantProcessor debit: totalPrice from: aCreditCard.
-	
+!Cashier methodsFor: 'operations - private' stamp: 'id 6/8/2022 20:08:15'!
+registerCheckoutOf: aCart debitedFrom: aCreditCard on: aSalesBook 
+
+	| client sale |
+
 	sale := Dictionary new.
-	sale add: 'items'->aCart items; add: 'client'->aCreditCard cardOwner; add: 'totalPrice'->totalPrice.
-	
-	aSalesBook add: sale.! !
+	sale add: 'items'->aCart items; add: 'totalPrice'->aCart totalPrice.
+	client := aCreditCard cardOwner.
+
+	aSalesBook
+		at: client
+		ifPresent: [ :clientSales | clientSales add: sale. ]
+		ifAbsent: [ aSalesBook at: client put: (OrderedCollection with: sale). ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -803,13 +839,13 @@ debit: anAmount from: aCreditCard
 	
 	parameters := messageSentWith.! !
 
-!MerchantProcessorSimulator methodsFor: 'operations' stamp: 'MYB 6/7/2022 22:43:20'!
-hasBeenCalled
+!MerchantProcessorSimulator methodsFor: 'operations' stamp: 'id 6/8/2022 20:10:33'!
+hasBeenRequested
 	
 	^self numberOfRequests > 0.! !
 
-!MerchantProcessorSimulator methodsFor: 'operations' stamp: 'id 6/7/2022 21:53:58'!
-hasBeenCalledWith: aDictionaryOfExpectedParameters
+!MerchantProcessorSimulator methodsFor: 'operations' stamp: 'id 6/8/2022 20:10:50'!
+hasBeenRequestedWith: aDictionaryOfExpectedParameters
 
 	^parameters = aDictionaryOfExpectedParameters.! !
 
