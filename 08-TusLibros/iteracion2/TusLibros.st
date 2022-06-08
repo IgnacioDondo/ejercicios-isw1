@@ -5,20 +5,35 @@ TestCase subclass: #TusLibrosModelTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosModelTest methodsFor: 'setUp' stamp: 'id 6/7/2022 19:02:44'!
+!TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'id 6/7/2022 19:02:44'!
 createCart
 
 	^Cart withPriceList: priceList.! !
 
-!TusLibrosModelTest methodsFor: 'setUp' stamp: 'id 6/7/2022 20:03:49'!
+!TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'id 6/7/2022 21:26:53'!
 createCashier
 
-	^Cashier withDate: (GregorianMonthOfYear yearNumber: 2022 monthNumber: 2).! !
+	^Cashier
+		withDate: (GregorianMonthOfYear yearNumber: 2022 monthNumber: 2)
+		merchantProcessor: self createMerchantProcessor.! !
 
-!TusLibrosModelTest methodsFor: 'setUp' stamp: 'id 6/7/2022 18:19:59'!
+!TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'id 6/7/2022 22:01:56'!
+createCashierWithMerchantProcessor: aMerchantProcessor 
+	
+	^Cashier
+		withDate: (GregorianMonthOfYear yearNumber: 2022 monthNumber: 2)
+		merchantProcessor: aMerchantProcessor.! !
+
+!TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'id 6/7/2022 18:19:59'!
 createCreditCardWithExpiration: aMonthOfYear 
 	
 	^CreditCard withNumber: '1234567890123456' expiration: aMonthOfYear owner: 'Hernan'.! !
+
+!TusLibrosModelTest methodsFor: 'auxiliary' stamp: 'id 6/7/2022 21:27:21'!
+createMerchantProcessor
+
+	^MerchantProcessorMock new.! !
+
 
 !TusLibrosModelTest methodsFor: 'setUp' stamp: 'id 6/7/2022 18:51:39'!
 setUp
@@ -242,17 +257,17 @@ test17CartWithBooksKnowsItsTotalPrice
 	self assert: 14 equals: cart totalPrice.! !
 
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 20:17:36'!
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 22:02:26'!
 test24CashierCannotCheckoutAnEmptyCart
 
 	| cart cashier creditCard expirationMonth merchantProcessorMock |
 	
-	merchantProcessorMock := MerchantProcessorMock new.
+	merchantProcessorMock := self createMerchantProcessor.
 	
 	expirationMonth := GregorianMonthOfYear yearNumber: 2022 monthNumber: 4.
 
 	cart := self createCart.
-	cashier := self createCashier.
+	cashier := self createCashierWithMerchantProcessor: merchantProcessorMock.
 	creditCard := self createCreditCardWithExpiration: expirationMonth.
 
 	self 
@@ -266,35 +281,12 @@ test24CashierCannotCheckoutAnEmptyCart
 			self deny: (merchantProcessorMock hasBeenCalled).
 		].! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 20:17:32'!
-test25OrderTotalBeforeCheckingOutAnyCartIsZero
-
-	| cashier cart |
-	
-	cart := self createCart.
-	cashier := self createCashier.
-	
-	self assert: 0 equals: (cashier orderTotalFor: cart).! !
-
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 20:17:29'!
-test26CashierKnowsOrderTotalAfterCheckingOutACartWithBooks
-
-	| cart cashier |
-	
-	cart := self createCart.
-	cart addBook: book1 withOccurrences: 1.
-	cart addBook: book2 withOccurrences: 2.
-	
-	cashier := self createCashier.
-	
-	self assert: 5 equals: (cashier orderTotalFor: cart).! !
-
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 20:17:26'!
-test27CashierCannotDebitFromAnExpiredCreditCard
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 22:06:20'!
+test25CashierCannotDebitFromAnExpiredCreditCard
 
 	| cart cashier creditCard expirationMonth merchantProcessorMock |
 	
-	merchantProcessorMock := MerchantProcessorMock new.
+	merchantProcessorMock := self createMerchantProcessor.
 	
 	cart := self createCart.
 	cart addBook: book1 withOccurrences: 1.
@@ -302,7 +294,7 @@ test27CashierCannotDebitFromAnExpiredCreditCard
 
 	expirationMonth := GregorianMonthOfYear yearNumber: 2022 monthNumber: 4.
 	
-	cashier := Cashier withDate: (GregorianMonthOfYear yearNumber: 2022 monthNumber: 5).
+	cashier := Cashier withDate: (GregorianMonthOfYear yearNumber: 2022 monthNumber: 5) merchantProcessor: merchantProcessorMock.
 
 	creditCard := self createCreditCardWithExpiration: expirationMonth.
 
@@ -317,16 +309,18 @@ test27CashierCannotDebitFromAnExpiredCreditCard
 			self deny: (merchantProcessorMock hasBeenCalled).
 		].! !
 
-!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 20:17:21'!
-test28CashierDebitsFromCreditCardWhenCardIsNotExpiredAndCartHasItems
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 22:06:24'!
+test26CashierDebitsFromCreditCardWhenCardIsNotExpiredAndCartHasItems
 
 	| cart cashier creditCard expirationMonth expectedArguments merchantProcessorMock |
+	
+	merchantProcessorMock := self createMerchantProcessor.
 	
 	cart := self createCart.
 	cart addBook: book1 withOccurrences: 1.
 	cart addBook: book2 withOccurrences: 2.
-
-	cashier := self createCashier.
+	
+	cashier := self createCashierWithMerchantProcessor: merchantProcessorMock.
 	
 	expirationMonth := GregorianMonthOfYear yearNumber: 2022 monthNumber: 4.
 	
@@ -338,11 +332,33 @@ test28CashierDebitsFromCreditCardWhenCardIsNotExpiredAndCartHasItems
 	expectedArguments add: 'creditCardOwner'->creditCard cardOwner.
 	expectedArguments add: 'transactionAmout'->cart totalPrice.
 
-	merchantProcessorMock := MerchantProcessorMock new.
-
 	cashier checkout: cart andDebitFrom: creditCard.
 
 	self assert: (merchantProcessorMock hasBeenCalledWith: expectedArguments).
+	
+	
+	! !
+
+!TusLibrosModelTest methodsFor: 'tests - cashier' stamp: 'id 6/7/2022 22:06:28'!
+test27CashierDebitsFromCreditCardOnlyOneTime
+
+	| cart cashier creditCard expirationMonth merchantProcessorMock |
+	
+	merchantProcessorMock := self createMerchantProcessor.
+	
+	cart := self createCart.
+	cart addBook: book1 withOccurrences: 1.
+	cart addBook: book2 withOccurrences: 2.
+
+	cashier := self createCashierWithMerchantProcessor: merchantProcessorMock.
+	
+	expirationMonth := GregorianMonthOfYear yearNumber: 2022 monthNumber: 4.
+	
+	creditCard := self createCreditCardWithExpiration: expirationMonth.
+
+	cashier checkout: cart andDebitFrom: creditCard.
+
+	self assert: 1 equals: (merchantProcessorMock numberOfCalls).
 	
 	
 	! !
@@ -546,7 +562,7 @@ withPriceList: aPriceList
 
 !classDefinition: #Cashier category: 'TusLibros'!
 Object subclass: #Cashier
-	instanceVariableNames: 'date'
+	instanceVariableNames: 'date merchantProcessor'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -573,24 +589,20 @@ signalCannotDebitFromAnExpiredCreditCard
 	^ self error: self class cannotDebitFromAnExpiredCard! !
 
 
-!Cashier methodsFor: 'initialization' stamp: 'id 6/7/2022 19:51:25'!
-initializeWithDate: aDate
+!Cashier methodsFor: 'initialization' stamp: 'id 6/7/2022 21:56:26'!
+initializeWithDate: aDate merchantProcessor: aMerchantProcessor
 
-	date := aDate.! !
+	date := aDate.
+	merchantProcessor := aMerchantProcessor.! !
 
 
-!Cashier methodsFor: 'operations' stamp: 'id 6/7/2022 20:08:51'!
+!Cashier methodsFor: 'operations' stamp: 'id 6/7/2022 21:47:39'!
 checkout: aCart andDebitFrom: aCreditCard
 
 	self assertCartIsNotEmpty: aCart.
 	self assertCreditCardIsNotExpired: aCreditCard.
 	
-	"orderTotal := self orderTotalFor: Cart new."! !
-
-!Cashier methodsFor: 'operations' stamp: 'id 6/7/2022 19:39:39'!
-orderTotalFor: aCart
-	
-	^aCart totalPrice.! !
+	merchantProcessor debit: (aCart totalPrice) from: aCreditCard.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -609,10 +621,10 @@ cannotDebitFromAnExpiredCard
 	^'Cannot debit from an expired card'.! !
 
 
-!Cashier class methodsFor: 'instance creation' stamp: 'id 6/7/2022 20:04:19'!
-withDate: aMonthOfYear
+!Cashier class methodsFor: 'instance creation' stamp: 'id 6/7/2022 20:32:29'!
+withDate: aMonthOfYear merchantProcessor: aMerchantProcessor 
 
-	^self new initializeWithDate: aMonthOfYear.! !
+	^self new initializeWithDate: aMonthOfYear merchantProcessor: aMerchantProcessor.! !
 
 
 !classDefinition: #CreditCard category: 'TusLibros'!
@@ -697,17 +709,44 @@ assertOwnerIsNotEmpty: anOwner
 
 !classDefinition: #MerchantProcessorMock category: 'TusLibros'!
 Object subclass: #MerchantProcessorMock
-	instanceVariableNames: ''
+	instanceVariableNames: 'numberOfCalls parameters'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!MerchantProcessorMock methodsFor: 'operations' stamp: 'id 6/7/2022 20:15:23'!
+!MerchantProcessorMock methodsFor: 'initialization' stamp: 'id 6/7/2022 21:52:53'!
+initialize
+
+	numberOfCalls := 0.
+	parameters := Dictionary new.! !
+
+
+!MerchantProcessorMock methodsFor: 'operations' stamp: 'id 6/7/2022 21:52:17'!
+debit: anAmount from: aCreditCard 
+	
+	| messageSentWith |
+	
+	numberOfCalls := numberOfCalls + 1.
+	
+	messageSentWith := Dictionary new.
+	messageSentWith add: 'creditCardNumber'->aCreditCard cardNumber.
+	messageSentWith add: 'creditCardExpiration'->aCreditCard expirationMonth.
+	messageSentWith add: 'creditCardOwner'->aCreditCard cardOwner.
+	messageSentWith add: 'transactionAmout'->anAmount.
+	
+	parameters := messageSentWith.! !
+
+!MerchantProcessorMock methodsFor: 'operations' stamp: 'id 6/7/2022 21:36:53'!
 hasBeenCalled
 	
-	^false.! !
+	^self numberOfCalls > 0.! !
 
-!MerchantProcessorMock methodsFor: 'operations' stamp: 'id 6/7/2022 20:10:32'!
+!MerchantProcessorMock methodsFor: 'operations' stamp: 'id 6/7/2022 21:53:58'!
 hasBeenCalledWith: aDictionaryOfExpectedParameters
 
-	^true.! !
+	^parameters = aDictionaryOfExpectedParameters.! !
+
+!MerchantProcessorMock methodsFor: 'operations' stamp: 'id 6/7/2022 21:53:47'!
+numberOfCalls
+	
+	^numberOfCalls.! !
