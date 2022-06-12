@@ -250,10 +250,24 @@ test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 
 !classDefinition: #TusLibrosSystemFacadeTest category: 'TusLibros'!
 TestCase subclass: #TusLibrosSystemFacadeTest
-	instanceVariableNames: 'testObjectsFactory authenticateBehaviour cartIdGeneratorBehaviour validClientId validPassword invalidClientId invalidPassword cartId'
+	instanceVariableNames: 'testObjectsFactory authenticateBehaviour cartIdGeneratorBehaviour validClientId validPassword cartId'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'MYB 6/12/2022 12:00:48'!
+createCartWithSystemFacade: systemFacade
+
+	^ systemFacade createCartWith: self clientId: validClientId password: validPassword! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'MYB 6/12/2022 14:47:25'!
+createSystemFacade
+
+	| merchantProcessorSimulator |
+	merchantProcessorSimulator := CashierTest new.
+	merchantProcessorSimulator setUp.
+	^ TusLibrosSystemFacade withCatalog: testObjectsFactory defaultCatalog throught: merchantProcessorSimulator! !
+
 
 !TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'MYB 6/9/2022 21:33:20'!
 setUp 
@@ -383,25 +397,21 @@ test06AddingInvalidBookToCartShouldRaiseError
 	
 	! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:54'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 17:58:47'!
 test07AddingBooksToCartShouldAddBooksToCart
 
-	| systemFacade book cart newCartId quantity response |
-	
+	| systemFacade book cart newCartId quantity |
+
 	systemFacade := self createSystemFacade.
-	
+
 	newCartId := self createCartWithSystemFacade: systemFacade.
 	cart := systemFacade listCartWithId: newCartId.
 	book := testObjectsFactory itemSellByTheStore.
 	quantity := 3.
 
-	response := systemFacade addToCart: newCartId aQuantity: quantity ofBook: book. 
-	
-	self assert: response.
-	self assert: quantity equals: (cart occurrencesOf: book).
-	
-	
-	! !
+	systemFacade addToCart: newCartId aQuantity: quantity ofBook: book.
+
+	self assert: quantity equals: (cart occurrencesOf: book).! !
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:58'!
 test08CheckoutEmptyCartShouldRaiseError
@@ -483,27 +493,29 @@ test12ListPurchasesOfClientShouldReturnItsPurchases
 	self assert: (Bag new add: testObjectsFactory itemSellByTheStore withOccurrences: 3;yourself) equals: sale items.
 	self assert: 30 equals: sale total.! !
 
-
-!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'MYB 6/12/2022 12:00:48'!
-createCartWithSystemFacade: systemFacade
-
-	^ systemFacade createCartWith: self clientId: validClientId password: validPassword! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'MYB 6/12/2022 14:47:25'!
-createSystemFacade
-
-	| merchantProcessorSimulator |
-	merchantProcessorSimulator := CashierTest new.
-	merchantProcessorSimulator setUp.
-	^ TusLibrosSystemFacade withCatalog: testObjectsFactory defaultCatalog throught: merchantProcessorSimulator! !
-
 
 !classDefinition: #Cart category: 'TusLibros'!
 Object subclass: #Cart
-	instanceVariableNames: 'catalog items symbol owner'
+	instanceVariableNames: 'catalog items owner'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!Cart methodsFor: 'accesing' stamp: 'MYB 6/12/2022 13:25:29'!
+items
+
+	^ items! !
+
+!Cart methodsFor: 'accesing' stamp: 'MYB 6/12/2022 13:56:37'!
+owner
+
+	^ owner! !
+
+!Cart methodsFor: 'accesing' stamp: 'HernanWilkinson 6/17/2013 19:09'!
+total
+
+	^ items sum: [ :anItem | catalog at: anItem ]! !
+
 
 !Cart methodsFor: 'adding' stamp: 'HernanWilkinson 6/17/2013 17:44'!
 add: anItem
@@ -571,22 +583,6 @@ isEmpty
 	
 	^items isEmpty ! !
 
-
-!Cart methodsFor: 'accesing' stamp: 'MYB 6/12/2022 13:25:29'!
-items
-
-	^ items! !
-
-!Cart methodsFor: 'accesing' stamp: 'MYB 6/12/2022 13:56:37'!
-owner
-
-	^ owner! !
-
-!Cart methodsFor: 'accesing' stamp: 'HernanWilkinson 6/17/2013 19:09'!
-total
-
-	^ items sum: [ :anItem | catalog at: anItem ]! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Cart class' category: 'TusLibros'!
@@ -601,7 +597,7 @@ acceptingItemsOf: aCatalog withOwner: aSymbol
 
 !classDefinition: #Cashier category: 'TusLibros'!
 Object subclass: #Cashier
-	instanceVariableNames: 'cart salesBook merchantProcessor creditCard total clientId'
+	instanceVariableNames: 'cart salesBook merchantProcessor creditCard total'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -621,12 +617,6 @@ calculateTotal
 
 	total := cart total.
 	! !
-
-!Cashier methodsFor: 'checkout - private' stamp: 'HernanWilkinson 6/17/2013 19:07'!
-createSale
-
-	^ Sale of: total
-! !
 
 !Cashier methodsFor: 'checkout - private' stamp: 'HernanWilkinson 6/17/2013 19:06'!
 debitTotal
@@ -727,23 +717,10 @@ expiringOn: aMonth
 
 !classDefinition: #Sale category: 'TusLibros'!
 Object subclass: #Sale
-	instanceVariableNames: 'total items cart client'
+	instanceVariableNames: 'total items client'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
-
-!Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:08:11'!
-initializeWith: aCart 
-	
-	aCart registerSale: self! !
-
-!Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:09:53'!
-registerWithTotal: aTotal items: aBagOfItems client: aClientId 
-	
-	total := aTotal.
-	items := aBagOfItems.
-	client := aClientId! !
-
 
 !Sale methodsFor: 'accesing' stamp: 'MYB 6/12/2022 14:11:56'!
 client
@@ -759,6 +736,19 @@ items
 total
 	
 	^ total! !
+
+
+!Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:08:11'!
+initializeWith: aCart 
+	
+	aCart registerSale: self! !
+
+!Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:09:53'!
+registerWithTotal: aTotal items: aBagOfItems client: aClientId 
+	
+	total := aTotal.
+	items := aBagOfItems.
+	client := aClientId! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -844,6 +834,18 @@ Object subclass: #TusLibrosSystemFacade
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
+!TusLibrosSystemFacade methodsFor: 'assertions' stamp: 'id 6/12/2022 17:37:48'!
+assertValidCredentialsForAPI: anAPI clientId: aClientId password: aPassword
+
+	(anAPI authenticateWithClientId: aClientId password: aPassword) ifFalse: [ self signalCouldNotAuthenticateWithInvalidCredentials. ].! !
+
+
+!TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 17:37:32'!
+signalCouldNotAuthenticateWithInvalidCredentials
+
+	^ self error: self class couldNotAuthenticateWithInvalidCredentials! !
+
+
 !TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'MYB 6/12/2022 12:44:45'!
 initializeWithCatalog: aCatalog throught: aMerchantProcessor
 
@@ -853,12 +855,10 @@ initializeWithCatalog: aCatalog throught: aMerchantProcessor
 	merchantProcessor := aMerchantProcessor.! !
 
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 11:53:47'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 17:57:52'!
 addToCart: aCartId aQuantity: aQuantity ofBook: aBook
 	
-	(carts at: aCartId) add: aQuantity of: aBook.
-	^true.
-	! !
+	(carts at: aCartId) add: aQuantity of: aBook.! !
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 14:45:41'!
 checkoutWithCartId: aCartId charging: aCreditCard 
@@ -900,13 +900,6 @@ listPurchasesWith: anAPI clientId: aClientId password: aPassword
 	
 	^salesBook select: [ :sale | sale client = aClientId ]
 	! !
-
-
-!TusLibrosSystemFacade methodsFor: 'assertions' stamp: 'MYB 6/12/2022 16:16:11'!
-assertValidCredentialsForAPI: anAPI clientId: aClientId password: aPassword
-
-	(anAPI authenticateWithClientId: aClientId password: aPassword) 
-		ifFalse: [self error: self class couldNotAuthenticateWithInvalidCredentials]! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
