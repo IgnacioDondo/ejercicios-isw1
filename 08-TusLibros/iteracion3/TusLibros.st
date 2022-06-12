@@ -100,26 +100,19 @@ test08CartRemembersTheNumberOfAddedItems
 
 !classDefinition: #CashierTest category: 'TusLibros'!
 TestCase subclass: #CashierTest
-	instanceVariableNames: 'testObjectsFactory debitBehavior clientId'
+	instanceVariableNames: 'testObjectsFactory clientId'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'merchant processor protocol' stamp: 'HernanWilkinson 6/17/2013 19:02'!
-debit: anAmount from: aCreditCard 
-
-	^debitBehavior value: anAmount value: aCreditCard ! !
-
-
-!CashierTest methodsFor: 'setup' stamp: 'MYB 6/12/2022 13:35:22'!
+!CashierTest methodsFor: 'setup' stamp: 'id 6/12/2022 19:15:40'!
 setUp 
 
 	testObjectsFactory := StoreTestObjectsFactory new.
-	debitBehavior := [ :anAmount :aCreditCard | ].
 	clientId := 1.! !
 
 
-!CashierTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 13:57:22'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
 test01CanNotCheckoutAnEmptyCart
 
 	| salesBook |
@@ -130,7 +123,7 @@ test01CanNotCheckoutAnEmptyCart
 		should: [ Cashier 
 			toCheckout: testObjectsFactory createCart 
 			charging: testObjectsFactory notExpiredCreditCard 
-			throught: self
+			throught: testObjectsFactory defaultMerchantProcessor
 			on: testObjectsFactory today
 			registeringOn:  salesBook ]
 		raise: Error - MessageNotUnderstood
@@ -138,7 +131,7 @@ test01CanNotCheckoutAnEmptyCart
 			self assert: anError messageText = Cashier cartCanNotBeEmptyErrorMessage.
 			self assert: salesBook isEmpty ]! !
 
-!CashierTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 14:49:13'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
 test02CalculatedTotalIsCorrect
 
 	| cart cashier |
@@ -149,13 +142,13 @@ test02CalculatedTotalIsCorrect
 	cashier :=  Cashier
 		toCheckout: cart 
 		charging: testObjectsFactory notExpiredCreditCard 
-		throught: self
+		throught: testObjectsFactory defaultMerchantProcessor
 		on: testObjectsFactory today 
 		registeringOn: OrderedCollection new.
 		
 	self assert: cashier checkOut = (testObjectsFactory itemSellByTheStorePrice * 2)! !
 
-!CashierTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 13:57:34'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
 test03CanNotCheckoutWithAnExpiredCreditCart
 
 	| cart salesBook |
@@ -168,7 +161,7 @@ test03CanNotCheckoutWithAnExpiredCreditCart
 		should: [ Cashier 
 				toCheckout: cart 
 				charging: testObjectsFactory expiredCreditCard 
-				throught: self
+				throught: testObjectsFactory defaultMerchantProcessor
 				on: testObjectsFactory today
 				registeringOn: salesBook ]
 		raise: Error - MessageNotUnderstood
@@ -176,7 +169,7 @@ test03CanNotCheckoutWithAnExpiredCreditCart
 			self assert: anError messageText = Cashier canNotChargeAnExpiredCreditCardErrorMessage.
 			self assert: salesBook isEmpty ]! !
 
-!CashierTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 14:49:48'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
 test04CheckoutRegistersASale
 
 	| cart cashier salesBook total |
@@ -188,7 +181,7 @@ test04CheckoutRegistersASale
 	cashier:= Cashier 
 		toCheckout: cart 
 		charging: testObjectsFactory notExpiredCreditCard
-		throught: self
+		throught: testObjectsFactory defaultMerchantProcessor
 		on: testObjectsFactory today
 		registeringOn: salesBook.
 		
@@ -197,49 +190,53 @@ test04CheckoutRegistersASale
 	self assert: salesBook size = 1.
 	self assert: salesBook first total = total.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 14:49:23'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:19:12'!
 test05CashierChargesCreditCardUsingMerchantProcessor
 
-	| cart cashier salesBook total creditCard debitedAmout debitedCreditCard  |
+	| cart cashier salesBook total creditCard debitedAmout debitedCreditCard  merchantProcessor |
 
 	cart := testObjectsFactory createCart.
 	cart add: testObjectsFactory itemSellByTheStore.
 	creditCard := testObjectsFactory notExpiredCreditCard.
 	salesBook := OrderedCollection new.
 	
+	merchantProcessor := testObjectsFactory createMerchantProcessorWith: [ :anAmount :aCreditCard | 
+		debitedAmout := anAmount.
+		debitedCreditCard := aCreditCard
+	].
+
 	cashier:= Cashier 
 		toCheckout: cart 
 		charging: creditCard
-		throught: self
+		throught: merchantProcessor
 		on: testObjectsFactory today
 		registeringOn: salesBook.
-		
-	debitBehavior := [ :anAmount :aCreditCard | 
-		debitedAmout := anAmount.
-		debitedCreditCard := aCreditCard ].
+
 	total := cashier checkOut.
 					
 	self assert: debitedCreditCard = creditCard.
 	self assert: debitedAmout = total.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 13:59:55'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:20:04'!
 test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 
-	| cart cashier salesBook creditCard |
+	| cart cashier salesBook creditCard merchantProcessor |
 
 	cart := testObjectsFactory createCart.
 	cart add: testObjectsFactory itemSellByTheStore.
 	creditCard := testObjectsFactory notExpiredCreditCard.
 	salesBook := OrderedCollection new.
- 	debitBehavior := [ :anAmount :aCreditCard | self error: Cashier creditCardHasNoCreditErrorMessage].
-	
+ 	merchantProcessor :=  testObjectsFactory createMerchantProcessorWith: [ :anAmount :aCreditCard |
+		self error: Cashier creditCardHasNoCreditErrorMessage
+	].
+
 	cashier:= Cashier 
 		toCheckout: cart 
 		charging: creditCard
-		throught: self
+		throught: merchantProcessor
 		on: testObjectsFactory today
 		registeringOn: salesBook.
-		
+
 	self 
 		should: [cashier checkOut ]
 		raise: Error - MessageNotUnderstood
@@ -260,13 +257,12 @@ createCartWithSystemFacade: systemFacade
 
 	^ systemFacade createCartWith: self clientId: validClientId password: validPassword! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'MYB 6/12/2022 14:47:25'!
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/12/2022 19:26:08'!
 createSystemFacade
 
-	| merchantProcessorSimulator |
-	merchantProcessorSimulator := CashierTest new.
-	merchantProcessorSimulator setUp.
-	^ TusLibrosSystemFacade withCatalog: testObjectsFactory defaultCatalog throught: merchantProcessorSimulator! !
+	^TusLibrosSystemFacade
+		withCatalog: testObjectsFactory defaultCatalog
+		throught: testObjectsFactory defaultMerchantProcessor.! !
 
 
 !TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'MYB 6/9/2022 21:33:20'!
@@ -374,7 +370,7 @@ test05ListingTwoDifferentCartsShouldReturnDifferentCarts
 	
 	! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:50'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 18:46:07'!
 test06AddingInvalidBookToCartShouldRaiseError
 
 	| systemFacade book cart newCartId quantity |
@@ -390,12 +386,9 @@ test06AddingInvalidBookToCartShouldRaiseError
 		should: [systemFacade addToCart: newCartId aQuantity: quantity ofBook: book ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
+			self assert: cart invalidItemErrorMessage equals: anError messageText.
 			self assert: cart isEmpty
-		]
-	
-	
-	! !
+		].! !
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 17:58:47'!
 test07AddingBooksToCartShouldAddBooksToCart
@@ -413,7 +406,7 @@ test07AddingBooksToCartShouldAddBooksToCart
 
 	self assert: quantity equals: (cart occurrencesOf: book).! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:58'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 18:45:58'!
 test08CheckoutEmptyCartShouldRaiseError
 
 	| systemFacade newCartId |
@@ -426,13 +419,10 @@ test08CheckoutEmptyCartShouldRaiseError
 		should: [systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = Cashier cartCanNotBeEmptyErrorMessage.
-		]
-	
-	
-	! !
+			self assert: Cashier cartCanNotBeEmptyErrorMessage equals: anError messageText.
+		].! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:58:02'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 18:46:25'!
 test09CheckoutWithInvalidCardShouldRaiseError
 
 	| systemFacade newCartId |
@@ -446,11 +436,8 @@ test09CheckoutWithInvalidCardShouldRaiseError
 		should: [systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory expiredCreditCard ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = Cashier canNotChargeAnExpiredCreditCardErrorMessage.
-		]
-	
-	
-	! !
+			self assert: Cashier canNotChargeAnExpiredCreditCardErrorMessage equals: anError messageText.
+		].! !
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 14:41:58'!
 test10CheckoutCartShouldReturnTransactionId
@@ -624,15 +611,13 @@ debitTotal
 	merchantProcessor debit: total from: creditCard.
 	! !
 
-!Cashier methodsFor: 'checkout - private' stamp: 'MYB 6/12/2022 14:47:46'!
+!Cashier methodsFor: 'checkout - private' stamp: 'id 6/12/2022 19:01:04'!
 registerSale
 
-	"salesBook add: self createSale."
-	
 	| sale |
 	sale := Sale with: cart.
 
-	salesBook add: sale. ! !
+	salesBook add: sale.! !
 
 
 !Cashier methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:53'!
@@ -660,15 +645,6 @@ assertIsNotExpired: aCreditCard on: aDate
 	(aCreditCard isExpiredOn: aDate) ifTrue: [ self error: self canNotChargeAnExpiredCreditCardErrorMessage ]! !
 
 
-!Cashier class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 13:31:21'!
-toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate registeringOn: aSalesBook
-	
-	self assertIsNotEmpty: aCart.
-	self assertIsNotExpired: aCreditCard on: aDate.
-	
-	^self new initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor registeringOn: aSalesBook! !
-
-
 !Cashier class methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 18:21'!
 canNotChargeAnExpiredCreditCardErrorMessage
 	
@@ -683,6 +659,15 @@ cartCanNotBeEmptyErrorMessage
 creditCardHasNoCreditErrorMessage
 	
 	^'Credit card has no credit'! !
+
+
+!Cashier class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 13:31:21'!
+toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate registeringOn: aSalesBook
+	
+	self assertIsNotEmpty: aCart.
+	self assertIsNotExpired: aCreditCard on: aDate.
+	
+	^self new initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor registeringOn: aSalesBook! !
 
 
 !classDefinition: #CreditCard category: 'TusLibros'!
@@ -713,6 +698,35 @@ CreditCard class
 expiringOn: aMonth 
 	
 	^self new initializeExpiringOn: aMonth! !
+
+
+!classDefinition: #MerchantProcessorSimulator category: 'TusLibros'!
+Object subclass: #MerchantProcessorSimulator
+	instanceVariableNames: 'behaviour'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!MerchantProcessorSimulator methodsFor: 'initialization' stamp: 'id 6/12/2022 19:13:10'!
+debit: anAmount from: aCreditCard
+
+	^behaviour value: anAmount value: aCreditCard.! !
+
+!MerchantProcessorSimulator methodsFor: 'initialization' stamp: 'id 6/12/2022 19:12:23'!
+initializeWith: aBlock
+
+	behaviour := aBlock.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MerchantProcessorSimulator class' category: 'TusLibros'!
+MerchantProcessorSimulator class
+	instanceVariableNames: ''!
+
+!MerchantProcessorSimulator class methodsFor: 'instance creation' stamp: 'id 6/12/2022 19:12:33'!
+with: aBlock
+
+	^self new initializeWith: aBlock.! !
 
 
 !classDefinition: #Sale category: 'TusLibros'!
@@ -826,6 +840,17 @@ itemSellByTheStorePrice
 	^10! !
 
 
+!StoreTestObjectsFactory methodsFor: 'merchant processor' stamp: 'id 6/12/2022 19:15:11'!
+createMerchantProcessorWith: aBlock
+
+	^MerchantProcessorSimulator with: aBlock.! !
+
+!StoreTestObjectsFactory methodsFor: 'merchant processor' stamp: 'id 6/12/2022 19:26:08'!
+defaultMerchantProcessor
+
+	^self createMerchantProcessorWith: [ :anAmount :aCreditCard | ].! !
+
+
 
 !classDefinition: #TusLibrosSystemFacade category: 'TusLibros'!
 Object subclass: #TusLibrosSystemFacade
@@ -840,19 +865,19 @@ assertValidCredentialsForAPI: anAPI clientId: aClientId password: aPassword
 	(anAPI authenticateWithClientId: aClientId password: aPassword) ifFalse: [ self signalCouldNotAuthenticateWithInvalidCredentials. ].! !
 
 
-!TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 17:37:32'!
+!TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 19:22:46'!
 signalCouldNotAuthenticateWithInvalidCredentials
 
-	^ self error: self class couldNotAuthenticateWithInvalidCredentials! !
+	^self error: self class couldNotAuthenticateWithInvalidCredentials.! !
 
 
-!TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'MYB 6/12/2022 12:44:45'!
+!TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'id 6/12/2022 19:23:21'!
 initializeWithCatalog: aCatalog throught: aMerchantProcessor
 
 	catalog := aCatalog.
+	merchantProcessor := aMerchantProcessor.
 	carts := Dictionary new.
-	salesBook := OrderedCollection new.
-	merchantProcessor := aMerchantProcessor.! !
+	salesBook := OrderedCollection new.! !
 
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 17:57:52'!
@@ -907,13 +932,13 @@ listPurchasesWith: anAPI clientId: aClientId password: aPassword
 TusLibrosSystemFacade class
 	instanceVariableNames: ''!
 
-!TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 12:45:51'!
-withCatalog: aCatalog throught: aMerchantProcessor
-
-	^self new initializeWithCatalog: aCatalog throught: aMerchantProcessor! !
-
-
 !TusLibrosSystemFacade class methodsFor: 'error descriptions' stamp: 'MYB 6/9/2022 21:30:04'!
 couldNotAuthenticateWithInvalidCredentials
 
 	^'Could not authenticate with invalid credentials'! !
+
+
+!TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 12:45:51'!
+withCatalog: aCatalog throught: aMerchantProcessor
+
+	^self new initializeWithCatalog: aCatalog throught: aMerchantProcessor! !
