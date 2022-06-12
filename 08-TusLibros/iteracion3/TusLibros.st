@@ -292,85 +292,7 @@ generateCartId
 	^cartIdGeneratorBehaviour value.! !
 
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:16'!
-test01CreateCartWithInvalidCredentialsShouldRaiseError
-
-	| systemFacade |
-	
-	systemFacade := self createSystemFacade.
-		
-	self 
-		should: [ systemFacade createCartWith: self clientId: nil password: nil]
-		raise: Error - MessageNotUnderstood 
-		withMessageText: TusLibrosSystemFacade couldNotAuthenticateWithInvalidCredentials 
-	
-	
-	! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:33'!
-test02CreateCartWithValidCredentialsShouldReturnCartId
-
-	| newCartId systemFacade |
-	
-	systemFacade := self createSystemFacade.
-	
-	newCartId := self createCartWithSystemFacade: systemFacade.
-	
-	self assert: cartId equals: newCartId
-	
-	
-	! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:37'!
-test03CreatingTwoCartsShouldReturnDifferentsCartIds
-
-	| systemFacade newCartId1 newCartId2 |
-	
-	systemFacade := self createSystemFacade.
-	
-	newCartId1 := self createCartWithSystemFacade: systemFacade.
-	newCartId2 := self createCartWithSystemFacade: systemFacade.
-	
-	self deny: newCartId1 = newCartId2.
-	
-	
-	! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:41'!
-test04CreateCartShouldReturnCartIdForAnEmptyCart
-
-	| newCartId cart systemFacade |
-	
-	systemFacade := self createSystemFacade.
-	
-	newCartId := self createCartWithSystemFacade: systemFacade.
-	
-	cart := systemFacade listCartWithId: newCartId.
-	
-	self assert: cart isEmpty
-	
-	
-	! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 12:57:46'!
-test05ListingTwoDifferentCartsShouldReturnDifferentCarts
-
-	| systemFacade cart1 cart2 newCartId1 newCartId2 |
-	
-	systemFacade := self createSystemFacade.
-	
-	newCartId1 := self createCartWithSystemFacade: systemFacade.
-	newCartId2 := self createCartWithSystemFacade: systemFacade.
-	
-	cart1 := systemFacade listCartWithId: newCartId1.
-	cart2 := systemFacade listCartWithId: newCartId2.
-	
-	self deny: cart1 = cart2
-	
-	
-	! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 18:46:07'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 18:46:07'!
 test06AddingInvalidBookToCartShouldRaiseError
 
 	| systemFacade book cart newCartId quantity |
@@ -390,7 +312,7 @@ test06AddingInvalidBookToCartShouldRaiseError
 			self assert: cart isEmpty
 		].! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 17:58:47'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 17:58:47'!
 test07AddingBooksToCartShouldAddBooksToCart
 
 	| systemFacade book cart newCartId quantity |
@@ -406,7 +328,49 @@ test07AddingBooksToCartShouldAddBooksToCart
 
 	self assert: quantity equals: (cart occurrencesOf: book).! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 18:45:58'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 20:23:35'!
+test13CannotAddNonPositiveAmountOfBooksToCart
+
+	| systemFacade book cart newCartId |
+
+	systemFacade := self createSystemFacade.
+
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	cart := systemFacade listCartWithId: newCartId.
+	book := testObjectsFactory itemSellByTheStore.
+
+	self
+		should: [ systemFacade addToCart: newCartId aQuantity: 0 ofBook: book. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: cart invalidQuantityErrorMessage equals: anError messageText.
+			self assert: cart isEmpty.
+		].! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 20:30:45'!
+test14CannotAddBookToAlreadyCheckedOutCart
+
+	| systemFacade book cart newCartId |
+
+	systemFacade := self createSystemFacade.
+
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	cart := systemFacade listCartWithId: newCartId.
+	book := testObjectsFactory itemSellByTheStore.
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+
+	systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard.
+
+	self
+		should: [ systemFacade addToCart: newCartId aQuantity: 2 ofBook: book. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade invalidCartId equals: anError messageText.
+			self assert: 1 equals: (cart occurrencesOf: book).
+		].! !
+
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 18:45:58'!
 test08CheckoutEmptyCartShouldRaiseError
 
 	| systemFacade newCartId |
@@ -422,7 +386,7 @@ test08CheckoutEmptyCartShouldRaiseError
 			self assert: Cashier cartCanNotBeEmptyErrorMessage equals: anError messageText.
 		].! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'id 6/12/2022 18:46:25'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 18:46:25'!
 test09CheckoutWithInvalidCardShouldRaiseError
 
 	| systemFacade newCartId |
@@ -439,7 +403,7 @@ test09CheckoutWithInvalidCardShouldRaiseError
 			self assert: Cashier canNotChargeAnExpiredCreditCardErrorMessage equals: anError messageText.
 		].! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 14:41:58'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'MYB 6/12/2022 14:41:58'!
 test10CheckoutCartShouldReturnTransactionId
 
 	| systemFacade newCartId transactionId |
@@ -454,7 +418,107 @@ test10CheckoutCartShouldReturnTransactionId
 	self deny: transactionId isNil.
 	self deny: (systemFacade listPurchasesWith: self clientId: validClientId password: validPassword) isEmpty ! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 14:31:26'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 20:42:49'!
+test16CannotCheckoutAnAlreadyCheckedOutCart
+
+	| systemFacade book newCartId |
+
+	systemFacade := self createSystemFacade.
+
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	book := testObjectsFactory itemSellByTheStore.
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+	systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard.
+
+	self
+		should: [ systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade invalidCartId equals: anError messageText.
+		].! !
+
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'MYB 6/12/2022 12:57:16'!
+test01CreateCartWithInvalidCredentialsShouldRaiseError
+
+	| systemFacade |
+	
+	systemFacade := self createSystemFacade.
+		
+	self 
+		should: [ systemFacade createCartWith: self clientId: nil password: nil]
+		raise: Error - MessageNotUnderstood 
+		withMessageText: TusLibrosSystemFacade couldNotAuthenticateWithInvalidCredentials 
+	
+	
+	! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'MYB 6/12/2022 12:57:33'!
+test02CreateCartWithValidCredentialsShouldReturnCartId
+
+	| newCartId systemFacade |
+	
+	systemFacade := self createSystemFacade.
+	
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	
+	self assert: cartId equals: newCartId
+	
+	
+	! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'MYB 6/12/2022 12:57:37'!
+test03CreatingTwoCartsShouldReturnDifferentsCartIds
+
+	| systemFacade newCartId1 newCartId2 |
+	
+	systemFacade := self createSystemFacade.
+	
+	newCartId1 := self createCartWithSystemFacade: systemFacade.
+	newCartId2 := self createCartWithSystemFacade: systemFacade.
+	
+	self deny: newCartId1 = newCartId2.
+	
+	
+	! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'MYB 6/12/2022 12:57:41'!
+test04CreateCartShouldReturnCartIdForAnEmptyCart
+
+	| newCartId cart systemFacade |
+	
+	systemFacade := self createSystemFacade.
+	
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	
+	cart := systemFacade listCartWithId: newCartId.
+	
+	self assert: cart isEmpty
+	
+	
+	! !
+
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list cart' stamp: 'MYB 6/12/2022 12:57:46'!
+test05ListingTwoDifferentCartsShouldReturnDifferentCarts
+
+	| systemFacade cart1 cart2 newCartId1 newCartId2 |
+	
+	systemFacade := self createSystemFacade.
+	
+	newCartId1 := self createCartWithSystemFacade: systemFacade.
+	newCartId2 := self createCartWithSystemFacade: systemFacade.
+	
+	cart1 := systemFacade listCartWithId: newCartId1.
+	cart2 := systemFacade listCartWithId: newCartId2.
+	
+	self deny: cart1 = cart2
+	
+	
+	! !
+
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'MYB 6/12/2022 14:31:26'!
 test11ListPurchasesOfClientWithoutPurchasesShouldReturnEmptyCollection
 
 	| systemFacade |
@@ -463,7 +527,7 @@ test11ListPurchasesOfClientWithoutPurchasesShouldReturnEmptyCollection
 	
 	self assert: OrderedCollection new equals: (systemFacade listPurchasesWith: self clientId: validClientId password: validPassword).! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests' stamp: 'MYB 6/12/2022 15:36:25'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'MYB 6/12/2022 15:36:25'!
 test12ListPurchasesOfClientShouldReturnItsPurchases
 
 	| systemFacade newCartId sale |
@@ -479,6 +543,25 @@ test12ListPurchasesOfClientShouldReturnItsPurchases
 	self assert: validClientId equals: sale client.
 	self assert: (Bag new add: testObjectsFactory itemSellByTheStore withOccurrences: 3;yourself) equals: sale items.
 	self assert: 30 equals: sale total.! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'id 6/12/2022 20:39:27'!
+test15CannotListAnAlreadyCheckedOutCart
+
+	| systemFacade book newCartId |
+
+	systemFacade := self createSystemFacade.
+
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	book := testObjectsFactory itemSellByTheStore.
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+	systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard.
+
+	self
+		should: [ systemFacade listCartWithId: newCartId. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade invalidCartId equals: anError messageText.
+		].! !
 
 
 !classDefinition: #Cart category: 'TusLibros'!
@@ -850,7 +933,6 @@ defaultMerchantProcessor
 
 	^self createMerchantProcessorWith: [ :anAmount :aCreditCard | ].! !
 
-
 
 !classDefinition: #TusLibrosSystemFacade category: 'TusLibros'!
 Object subclass: #TusLibrosSystemFacade
@@ -865,10 +947,15 @@ assertValidCredentialsForAPI: anAPI clientId: aClientId password: aPassword
 	(anAPI authenticateWithClientId: aClientId password: aPassword) ifFalse: [ self signalCouldNotAuthenticateWithInvalidCredentials. ].! !
 
 
-!TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 19:22:46'!
+!TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 20:35:57'!
 signalCouldNotAuthenticateWithInvalidCredentials
 
-	^self error: self class couldNotAuthenticateWithInvalidCredentials.! !
+	self error: self class couldNotAuthenticateWithInvalidCredentials.! !
+
+!TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 20:35:53'!
+signalInvalidCartId
+
+	self error: self class invalidCartId.! !
 
 
 !TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'id 6/12/2022 19:23:21'!
@@ -880,24 +967,32 @@ initializeWithCatalog: aCatalog throught: aMerchantProcessor
 	salesBook := OrderedCollection new.! !
 
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 17:57:52'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:41:24'!
 addToCart: aCartId aQuantity: aQuantity ofBook: aBook
-	
-	(carts at: aCartId) add: aQuantity of: aBook.! !
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 14:45:41'!
+	| cart |
+
+	cart := self getCartWithIdIfPresent: aCartId.
+
+	cart add: aQuantity of: aBook.! !
+
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:43:56'!
 checkoutWithCartId: aCartId charging: aCreditCard 
 	
-	| cashier |
+	| cart cashier |
+
+	cart := self getCartWithIdIfPresent: aCartId.
+
 	cashier := Cashier
-		toCheckout: (carts at: aCartId)
+		toCheckout: cart
 		charging: aCreditCard
 		throught: merchantProcessor 
 		on: DateAndTime now
 		registeringOn: salesBook.
-		
-	cashier checkOut 
-	! !
+
+	cashier checkOut.
+
+	self invalidateCartId: aCartId.! !
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 13:52:53'!
 createCartWith: anAPI clientId: aClientId password: aPassword
@@ -913,10 +1008,10 @@ createCartWith: anAPI clientId: aClientId password: aPassword
 	^ cartId
 	! !
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 11:32:31'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:41:24'!
 listCartWithId: aCartId 
 	
-	^carts at: aCartId! !
+	^self getCartWithIdIfPresent: aCartId.! !
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 14:48:08'!
 listPurchasesWith: anAPI clientId: aClientId password: aPassword 
@@ -925,6 +1020,17 @@ listPurchasesWith: anAPI clientId: aClientId password: aPassword
 	
 	^salesBook select: [ :sale | sale client = aClientId ]
 	! !
+
+
+!TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/12/2022 20:41:24'!
+getCartWithIdIfPresent: aCartId
+
+	^ carts at: aCartId ifAbsent: [ self signalInvalidCartId. ]! !
+
+!TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/12/2022 20:36:44'!
+invalidateCartId: aCartId
+
+	^ carts removeKey: aCartId! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -936,6 +1042,11 @@ TusLibrosSystemFacade class
 couldNotAuthenticateWithInvalidCredentials
 
 	^'Could not authenticate with invalid credentials'! !
+
+!TusLibrosSystemFacade class methodsFor: 'error descriptions' stamp: 'id 6/12/2022 20:30:30'!
+invalidCartId
+
+	^'Invalid cart id'.! !
 
 
 !TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 12:45:51'!
