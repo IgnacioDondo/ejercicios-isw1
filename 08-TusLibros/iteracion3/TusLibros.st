@@ -112,7 +112,7 @@ setUp
 	clientId := 1.! !
 
 
-!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 22:25:35'!
 test01CanNotCheckoutAnEmptyCart
 
 	| salesBook |
@@ -125,16 +125,17 @@ test01CanNotCheckoutAnEmptyCart
 			charging: testObjectsFactory notExpiredCreditCard 
 			throught: testObjectsFactory defaultMerchantProcessor
 			on: testObjectsFactory today
+			with: testObjectsFactory defaultTransactionIdGenerator
 			registeringOn:  salesBook ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Cashier cartCanNotBeEmptyErrorMessage.
 			self assert: salesBook isEmpty ]! !
 
-!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 23:01:26'!
 test02CalculatedTotalIsCorrect
 
-	| cart cashier |
+	| cart cashier sale |
 	
 	cart := testObjectsFactory createCart.
 	cart add: 2 of: testObjectsFactory itemSellByTheStore.
@@ -143,12 +144,15 @@ test02CalculatedTotalIsCorrect
 		toCheckout: cart 
 		charging: testObjectsFactory notExpiredCreditCard 
 		throught: testObjectsFactory defaultMerchantProcessor
-		on: testObjectsFactory today 
+		on: testObjectsFactory today
+		with: testObjectsFactory defaultTransactionIdGenerator
 		registeringOn: OrderedCollection new.
 		
-	self assert: cashier checkOut = (testObjectsFactory itemSellByTheStorePrice * 2)! !
+	sale := cashier checkOut.
+	
+	self assert: (testObjectsFactory itemSellByTheStorePrice * 2) equals: sale total.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 22:25:53'!
 test03CanNotCheckoutWithAnExpiredCreditCart
 
 	| cart salesBook |
@@ -163,16 +167,17 @@ test03CanNotCheckoutWithAnExpiredCreditCart
 				charging: testObjectsFactory expiredCreditCard 
 				throught: testObjectsFactory defaultMerchantProcessor
 				on: testObjectsFactory today
+				with: testObjectsFactory defaultTransactionIdGenerator
 				registeringOn: salesBook ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError | 
 			self assert: anError messageText = Cashier canNotChargeAnExpiredCreditCardErrorMessage.
 			self assert: salesBook isEmpty ]! !
 
-!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:26:08'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 23:07:44'!
 test04CheckoutRegistersASale
 
-	| cart cashier salesBook total |
+	| cart cashier salesBook sale |
 
 	cart := testObjectsFactory createCart.
 	cart add: testObjectsFactory itemSellByTheStore.
@@ -183,17 +188,18 @@ test04CheckoutRegistersASale
 		charging: testObjectsFactory notExpiredCreditCard
 		throught: testObjectsFactory defaultMerchantProcessor
 		on: testObjectsFactory today
+		with: testObjectsFactory defaultTransactionIdGenerator
 		registeringOn: salesBook.
 		
-	total := cashier checkOut.
+	sale := cashier checkOut.
 					
 	self assert: salesBook size = 1.
-	self assert: salesBook first total = total.! !
+	self assert: salesBook first total = sale total.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:19:12'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 23:09:00'!
 test05CashierChargesCreditCardUsingMerchantProcessor
 
-	| cart cashier salesBook total creditCard debitedAmout debitedCreditCard  merchantProcessor |
+	| cart cashier salesBook creditCard debitedAmout debitedCreditCard  merchantProcessor sale |
 
 	cart := testObjectsFactory createCart.
 	cart add: testObjectsFactory itemSellByTheStore.
@@ -210,14 +216,15 @@ test05CashierChargesCreditCardUsingMerchantProcessor
 		charging: creditCard
 		throught: merchantProcessor
 		on: testObjectsFactory today
+		with: testObjectsFactory defaultTransactionIdGenerator
 		registeringOn: salesBook.
 
-	total := cashier checkOut.
+	sale := cashier checkOut.
 					
 	self assert: debitedCreditCard = creditCard.
-	self assert: debitedAmout = total.! !
+	self assert: debitedAmout = sale total.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 19:20:04'!
+!CashierTest methodsFor: 'tests' stamp: 'id 6/12/2022 22:26:19'!
 test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 
 	| cart cashier salesBook creditCard merchantProcessor |
@@ -235,6 +242,7 @@ test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 		charging: creditCard
 		throught: merchantProcessor
 		on: testObjectsFactory today
+		with: testObjectsFactory defaultTransactionIdGenerator
 		registeringOn: salesBook.
 
 	self 
@@ -257,12 +265,21 @@ createCartWithSystemFacade: systemFacade
 
 	^ systemFacade createCartWith: self clientId: validClientId password: validPassword! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/12/2022 19:26:08'!
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/12/2022 22:24:18'!
 createSystemFacade
 
 	^TusLibrosSystemFacade
 		withCatalog: testObjectsFactory defaultCatalog
-		throught: testObjectsFactory defaultMerchantProcessor.! !
+		throught: testObjectsFactory defaultMerchantProcessor
+		withTransactionIdGenerator: testObjectsFactory defaultTransactionIdGenerator.! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/12/2022 22:31:31'!
+createSystemFacadeWithTransactionIdGenerator: aTransactionIdGenerator
+
+	^TusLibrosSystemFacade
+		withCatalog: testObjectsFactory defaultCatalog
+		throught: testObjectsFactory defaultMerchantProcessor
+		withTransactionIdGenerator: aTransactionIdGenerator.! !
 
 
 !TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'MYB 6/9/2022 21:33:20'!
@@ -403,20 +420,22 @@ test09CheckoutWithInvalidCardShouldRaiseError
 			self assert: Cashier canNotChargeAnExpiredCreditCardErrorMessage equals: anError messageText.
 		].! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'MYB 6/12/2022 14:41:58'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 23:11:15'!
 test10CheckoutCartShouldReturnTransactionId
 
-	| systemFacade newCartId transactionId |
-	
-	systemFacade := self createSystemFacade.
-	
+	| systemFacade newCartId transactionId transactionIdGenerator expectedTransactionId |
+
+	expectedTransactionId := 42.
+	transactionIdGenerator := TransactionIdGeneratorSimulator with: [ expectedTransactionId. ].
+	systemFacade := self createSystemFacadeWithTransactionIdGenerator: transactionIdGenerator.
+
 	newCartId := self createCartWithSystemFacade: systemFacade.
 	systemFacade addToCart: newCartId aQuantity: 3 ofBook: testObjectsFactory itemSellByTheStore.
 
 	transactionId := systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard.
-	
-	self deny: transactionId isNil.
-	self deny: (systemFacade listPurchasesWith: self clientId: validClientId password: validPassword) isEmpty ! !
+
+	self assert: expectedTransactionId equals: transactionId.
+	self deny: (systemFacade listPurchasesWith: self clientId: validClientId password: validPassword) isEmpty.! !
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 20:42:49'!
 test16CannotCheckoutAnAlreadyCheckedOutCart
@@ -628,10 +647,13 @@ occurrencesOf: anItem
 
 	^items occurrencesOf: anItem  ! !
 
-!Cart methodsFor: 'queries' stamp: 'MYB 6/12/2022 14:08:51'!
+!Cart methodsFor: 'queries' stamp: 'id 6/12/2022 23:09:42'!
 registerSale: aSale 
-	
-	aSale registerWithTotal: self total items: self items client: self owner! !
+
+	aSale
+		registerWithTotal: self total
+		items: self items
+		client: self owner.! !
 
 
 !Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
@@ -669,19 +691,21 @@ invalidQuantityErrorMessage
 
 !classDefinition: #Cashier category: 'TusLibros'!
 Object subclass: #Cashier
-	instanceVariableNames: 'cart salesBook merchantProcessor creditCard total'
+	instanceVariableNames: 'cart salesBook merchantProcessor creditCard total transactionIdGenerator'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'checkout' stamp: 'HernanWilkinson 6/17/2013 19:06'!
+!Cashier methodsFor: 'checkout' stamp: 'id 6/12/2022 23:00:22'!
 checkOut
+
+	| sale |
 
 	self calculateTotal.
 	self debitTotal.
-	self registerSale.
+	sale := self registerSale.
 
-	^ total! !
+	^sale.! !
 
 
 !Cashier methodsFor: 'checkout - private' stamp: 'HernanWilkinson 6/17/2013 19:08'!
@@ -696,22 +720,25 @@ debitTotal
 	merchantProcessor debit: total from: creditCard.
 	! !
 
-!Cashier methodsFor: 'checkout - private' stamp: 'id 6/12/2022 19:01:04'!
+!Cashier methodsFor: 'checkout - private' stamp: 'id 6/12/2022 23:00:28'!
 registerSale
 
 	| sale |
-	sale := Sale with: cart.
+	sale := Sale with: cart andId: (transactionIdGenerator generateId).
 
-	salesBook add: sale.! !
+	salesBook add: sale.
+	
+	^sale.! !
 
 
-!Cashier methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:53'!
-initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor registeringOn: aSalesBook
+!Cashier methodsFor: 'initialization' stamp: 'id 6/12/2022 22:16:27'!
+initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor with: aTransactionIdGenerator registeringOn: aSalesBook
 	
 	cart := aCart.
 	creditCard := aCreditCard.
 	merchantProcessor := aMerchantProcessor.
-	salesBook := aSalesBook! !
+	transactionIdGenerator := aTransactionIdGenerator.
+	salesBook := aSalesBook.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -746,13 +773,18 @@ creditCardHasNoCreditErrorMessage
 	^'Credit card has no credit'! !
 
 
-!Cashier class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 13:31:21'!
-toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate registeringOn: aSalesBook
+!Cashier class methodsFor: 'instance creation' stamp: 'id 6/12/2022 22:17:40'!
+toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate with: aTransactionIdGenerator registeringOn: aSalesBook
 	
 	self assertIsNotEmpty: aCart.
 	self assertIsNotExpired: aCreditCard on: aDate.
 	
-	^self new initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor registeringOn: aSalesBook! !
+	^self new
+		initializeToCheckout: aCart
+		charging: aCreditCard
+		throught: aMerchantProcessor
+		with: aTransactionIdGenerator
+		registeringOn: aSalesBook.! !
 
 
 !classDefinition: #CreditCard category: 'TusLibros'!
@@ -785,38 +817,9 @@ expiringOn: aMonth
 	^self new initializeExpiringOn: aMonth! !
 
 
-!classDefinition: #MerchantProcessorSimulator category: 'TusLibros'!
-Object subclass: #MerchantProcessorSimulator
-	instanceVariableNames: 'behaviour'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TusLibros'!
-
-!MerchantProcessorSimulator methodsFor: 'initialization' stamp: 'id 6/12/2022 19:13:10'!
-debit: anAmount from: aCreditCard
-
-	^behaviour value: anAmount value: aCreditCard.! !
-
-!MerchantProcessorSimulator methodsFor: 'initialization' stamp: 'id 6/12/2022 19:12:23'!
-initializeWith: aBlock
-
-	behaviour := aBlock.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'MerchantProcessorSimulator class' category: 'TusLibros'!
-MerchantProcessorSimulator class
-	instanceVariableNames: ''!
-
-!MerchantProcessorSimulator class methodsFor: 'instance creation' stamp: 'id 6/12/2022 19:12:33'!
-with: aBlock
-
-	^self new initializeWith: aBlock.! !
-
-
 !classDefinition: #Sale category: 'TusLibros'!
 Object subclass: #Sale
-	instanceVariableNames: 'total items client'
+	instanceVariableNames: 'total items client transactionId'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -836,11 +839,17 @@ total
 	
 	^ total! !
 
-
-!Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:08:11'!
-initializeWith: aCart 
+!Sale methodsFor: 'accesing' stamp: 'id 6/12/2022 23:11:27'!
+transactionId
 	
-	aCart registerSale: self! !
+	^transactionId.! !
+
+
+!Sale methodsFor: 'initialization' stamp: 'id 6/12/2022 23:09:30'!
+initializeWith: aCart andId: aTransactionId 
+
+	transactionId := aTransactionId.
+	aCart registerSale: self.! !
 
 !Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:09:53'!
 registerWithTotal: aTotal items: aBagOfItems client: aClientId 
@@ -855,10 +864,60 @@ registerWithTotal: aTotal items: aBagOfItems client: aClientId
 Sale class
 	instanceVariableNames: ''!
 
-!Sale class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 14:06:03'!
-with: aCart 
+!Sale class methodsFor: 'instance creation' stamp: 'id 6/12/2022 22:36:01'!
+with: aCart andId: aTransactionId 
 	
-	^self new initializeWith: aCart ! !
+	^self new initializeWith: aCart andId: aTransactionId.! !
+
+
+!classDefinition: #Simulator category: 'TusLibros'!
+Object subclass: #Simulator
+	instanceVariableNames: 'behaviour'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Simulator methodsFor: 'initialization' stamp: 'id 6/12/2022 23:14:53'!
+initializeWith: aBlock
+
+	behaviour := aBlock.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Simulator class' category: 'TusLibros'!
+Simulator class
+	instanceVariableNames: ''!
+
+!Simulator class methodsFor: 'instance creation' stamp: 'id 6/12/2022 23:13:58'!
+with: aBlock
+
+	^self new initializeWith: aBlock.! !
+
+
+!classDefinition: #MerchantProcessorSimulator category: 'TusLibros'!
+Simulator subclass: #MerchantProcessorSimulator
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!MerchantProcessorSimulator methodsFor: 'operations' stamp: 'id 6/12/2022 19:13:10'!
+debit: anAmount from: aCreditCard
+
+	^behaviour value: anAmount value: aCreditCard.! !
+
+
+!classDefinition: #TransactionIdGeneratorSimulator category: 'TusLibros'!
+Simulator subclass: #TransactionIdGeneratorSimulator
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TransactionIdGeneratorSimulator methodsFor: 'operations' stamp: 'id 6/12/2022 22:19:18'!
+generateId
+
+	^behaviour value.! !
 
 
 !classDefinition: #StoreTestObjectsFactory category: 'TusLibros'!
@@ -925,6 +984,17 @@ itemSellByTheStorePrice
 	^10! !
 
 
+!StoreTestObjectsFactory methodsFor: 'transactionId generator' stamp: 'id 6/12/2022 22:20:21'!
+createTransactionIdGeneratorWith: aBlock
+
+	^TransactionIdGeneratorSimulator with: aBlock.! !
+
+!StoreTestObjectsFactory methodsFor: 'transactionId generator' stamp: 'id 6/12/2022 22:33:45'!
+defaultTransactionIdGenerator
+
+	^self createTransactionIdGeneratorWith: [ nil ].! !
+
+
 !StoreTestObjectsFactory methodsFor: 'merchant processor' stamp: 'id 6/12/2022 19:15:11'!
 createMerchantProcessorWith: aBlock
 
@@ -938,7 +1008,7 @@ defaultMerchantProcessor
 
 !classDefinition: #TusLibrosSystemFacade category: 'TusLibros'!
 Object subclass: #TusLibrosSystemFacade
-	instanceVariableNames: 'catalog carts merchantProcessor salesBook'
+	instanceVariableNames: 'catalog carts merchantProcessor salesBook transactionIdGenerator'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -960,13 +1030,14 @@ signalInvalidCartId
 	self error: self class invalidCartId.! !
 
 
-!TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'id 6/12/2022 19:23:21'!
-initializeWithCatalog: aCatalog throught: aMerchantProcessor
+!TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'id 6/12/2022 22:23:21'!
+initializeWithCatalog: aCatalog throught: aMerchantProcessor withTransactionIdGenerator: aTransactionIdGenerator 
 
 	catalog := aCatalog.
 	merchantProcessor := aMerchantProcessor.
 	carts := Dictionary new.
-	salesBook := OrderedCollection new.! !
+	salesBook := OrderedCollection new.
+	transactionIdGenerator := aTransactionIdGenerator.! !
 
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:41:24'!
@@ -978,10 +1049,10 @@ addToCart: aCartId aQuantity: aQuantity ofBook: aBook
 
 	cart add: aQuantity of: aBook.! !
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:43:56'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 23:10:59'!
 checkoutWithCartId: aCartId charging: aCreditCard 
 	
-	| cart cashier |
+	| cart cashier sale |
 
 	cart := self getCartWithIdIfPresent: aCartId.
 
@@ -990,11 +1061,14 @@ checkoutWithCartId: aCartId charging: aCreditCard
 		charging: aCreditCard
 		throught: merchantProcessor 
 		on: DateAndTime now
+		with: transactionIdGenerator
 		registeringOn: salesBook.
 
-	cashier checkOut.
+	sale := cashier checkOut.
 
-	self invalidateCartId: aCartId.! !
+	self invalidateCartId: aCartId.
+	
+	^sale transactionId.! !
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 13:52:53'!
 createCartWith: anAPI clientId: aClientId password: aPassword
@@ -1051,7 +1125,10 @@ invalidCartId
 	^'Invalid cart id'.! !
 
 
-!TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 12:45:51'!
-withCatalog: aCatalog throught: aMerchantProcessor
+!TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'id 6/12/2022 22:23:41'!
+withCatalog: aCatalog throught: aMerchantProcessor withTransactionIdGenerator: aTransactionIdGenerator 
 
-	^self new initializeWithCatalog: aCatalog throught: aMerchantProcessor! !
+	^self new
+		initializeWithCatalog: aCatalog
+		throught: aMerchantProcessor
+		withTransactionIdGenerator: aTransactionIdGenerator.! !
