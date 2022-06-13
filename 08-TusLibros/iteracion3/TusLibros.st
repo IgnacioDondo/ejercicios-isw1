@@ -255,7 +255,7 @@ test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 
 !classDefinition: #TusLibrosSystemFacadeTest category: 'TusLibros'!
 TestCase subclass: #TusLibrosSystemFacadeTest
-	instanceVariableNames: 'testObjectsFactory authenticateBehaviour cartIdGeneratorBehaviour validClientId validPassword cartId'
+	instanceVariableNames: 'testObjectsFactory authenticateBehaviour cartIdGeneratorBehaviour validClientId validPassword cartId invalidClientId invalidPassword validClientId2 validPassword2'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -282,13 +282,21 @@ createSystemFacadeWithTransactionIdGenerator: aTransactionIdGenerator
 		withTransactionIdGenerator: aTransactionIdGenerator.! !
 
 
-!TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'MYB 6/9/2022 21:33:20'!
+!TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'id 6/12/2022 23:26:18'!
 setUp 
 
 	testObjectsFactory := StoreTestObjectsFactory new.
 	validClientId := #validClientId.
 	validPassword := #validPassword.
-	authenticateBehaviour := [ :aClientId :aPassword | aClientId = validClientId and: aPassword = validPassword ].
+	validClientId2 := #validClientId2.
+	validPassword2 := #validPassword2.
+	invalidClientId := nil.
+	invalidPassword := nil.
+	authenticateBehaviour := [ :aClientId :aPassword |
+		(aClientId = validClientId and: aPassword = validPassword) or: [
+			(aClientId = validClientId2 and: aPassword = validPassword2)
+		]
+	].
 	cartId := 0.
 	cartIdGeneratorBehaviour := [ 
 		cartId := cartId + 1. 
@@ -457,7 +465,7 @@ test16CannotCheckoutAnAlreadyCheckedOutCart
 		].! !
 
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'MYB 6/12/2022 12:57:16'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'id 6/12/2022 23:21:54'!
 test01CreateCartWithInvalidCredentialsShouldRaiseError
 
 	| systemFacade |
@@ -465,12 +473,9 @@ test01CreateCartWithInvalidCredentialsShouldRaiseError
 	systemFacade := self createSystemFacade.
 		
 	self 
-		should: [ systemFacade createCartWith: self clientId: nil password: nil]
+		should: [ systemFacade createCartWith: self clientId: invalidClientId password: invalidPassword. ]
 		raise: Error - MessageNotUnderstood 
-		withMessageText: TusLibrosSystemFacade couldNotAuthenticateWithInvalidCredentials 
-	
-	
-	! !
+		withMessageText: TusLibrosSystemFacade couldNotAuthenticateWithInvalidCredentials.! !
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests - create cart' stamp: 'MYB 6/12/2022 12:57:33'!
 test02CreateCartWithValidCredentialsShouldReturnCartId
@@ -583,6 +588,36 @@ test12ListPurchasesOfClientShouldReturnItsPurchases
 	self assert: validClientId equals: sale client.
 	self assert: (Bag new add: testObjectsFactory itemSellByTheStore withOccurrences: 3;yourself) equals: sale items.
 	self assert: 30 equals: sale total.! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'id 6/12/2022 23:22:16'!
+test18ListPurchasesWithInvalidCredentialsShouldRaiseError
+
+	| systemFacade |
+	
+	systemFacade := self createSystemFacade.
+
+	self 
+		should: [ systemFacade listPurchasesWith: self clientId: invalidClientId password: invalidPassword. ]
+		raise: Error - MessageNotUnderstood 
+		withMessageText: TusLibrosSystemFacade couldNotAuthenticateWithInvalidCredentials.! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'id 6/12/2022 23:30:21'!
+test19ListPurchasesOfClientShouldReturnItsPurchasesWhenThereHaveBeenMultiplePurchases
+
+	| systemFacade newCartId1 newCartId2 sales1 sales2 |
+	
+	systemFacade := self createSystemFacade.
+	newCartId1 := self createCartWithSystemFacade: systemFacade.
+	systemFacade addToCart: newCartId1 aQuantity: 3 ofBook: testObjectsFactory itemSellByTheStore.
+	systemFacade checkoutWithCartId: newCartId1 charging: testObjectsFactory notExpiredCreditCard.
+	sales1 := (systemFacade listPurchasesWith: self clientId: validClientId password: validPassword).
+
+	newCartId2 := self createCartWithSystemFacade: systemFacade.
+	systemFacade addToCart: newCartId2 aQuantity: 1 ofBook: testObjectsFactory itemSellByTheStore.
+	systemFacade checkoutWithCartId: newCartId2 charging: testObjectsFactory notExpiredCreditCard.
+	sales2 := (systemFacade listPurchasesWith: self clientId: validClientId2 password: validPassword2).
+
+	self deny: sales1 = sales2.! !
 
 
 !classDefinition: #Cart category: 'TusLibros'!
@@ -1000,10 +1035,13 @@ createMerchantProcessorWith: aBlock
 
 	^MerchantProcessorSimulator with: aBlock.! !
 
-!StoreTestObjectsFactory methodsFor: 'merchant processor' stamp: 'id 6/12/2022 19:26:08'!
+!StoreTestObjectsFactory methodsFor: 'merchant processor' stamp: 'id 6/12/2022 23:32:02'!
 defaultMerchantProcessor
 
-	^self createMerchantProcessorWith: [ :anAmount :aCreditCard | ].! !
+	^self createMerchantProcessorWith: [ :anAmount :aCreditCard |
+		anAmount.
+		aCreditCard.
+	].! !
 
 
 !classDefinition: #TusLibrosSystemFacade category: 'TusLibros'!
