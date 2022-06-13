@@ -853,11 +853,11 @@ debitTotal
 	merchantProcessor debit: total from: creditCard.
 	! !
 
-!Cashier methodsFor: 'checkout - private' stamp: 'id 6/12/2022 23:00:28'!
+!Cashier methodsFor: 'checkout - private' stamp: 'id 6/13/2022 02:46:17'!
 registerSale
 
 	| sale |
-	sale := Sale with: cart andId: (transactionIdGenerator generateId).
+	sale := Sale with: cart andIdGenerator: transactionIdGenerator.
 
 	salesBook add: sale.
 	
@@ -1014,10 +1014,10 @@ transactionId
 	^transactionId.! !
 
 
-!Sale methodsFor: 'initialization' stamp: 'id 6/12/2022 23:09:30'!
-initializeWith: aCart andId: aTransactionId 
+!Sale methodsFor: 'initialization' stamp: 'id 6/13/2022 02:46:32'!
+initializeWith: aCart andIdGenerator: aTransactionIdGenerator 
 
-	transactionId := aTransactionId.
+	transactionId := aTransactionIdGenerator generateId.
 	aCart registerSale: self.! !
 
 !Sale methodsFor: 'initialization' stamp: 'MYB 6/12/2022 14:09:53'!
@@ -1033,10 +1033,10 @@ registerWithTotal: aTotal items: aBagOfItems client: aClientId
 Sale class
 	instanceVariableNames: ''!
 
-!Sale class methodsFor: 'instance creation' stamp: 'id 6/12/2022 22:36:01'!
-with: aCart andId: aTransactionId 
+!Sale class methodsFor: 'instance creation' stamp: 'id 6/13/2022 02:45:40'!
+with: aCart andIdGenerator: aTransactionIdGenerator 
 	
-	^self new initializeWith: aCart andId: aTransactionId.! !
+	^self new initializeWith: aCart andIdGenerator: aTransactionIdGenerator.! !
 
 
 !classDefinition: #Simulator category: 'TusLibros'!
@@ -1112,6 +1112,7 @@ defaultCatalog
 defaultClientId
 	
 	^1! !
+
 
 
 !StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:37'!
