@@ -255,7 +255,7 @@ test06CashierDoesNotSaleWhenTheCreditCardHasNoCredit
 
 !classDefinition: #TusLibrosSystemFacadeTest category: 'TusLibros'!
 TestCase subclass: #TusLibrosSystemFacadeTest
-	instanceVariableNames: 'testObjectsFactory authenticateBehaviour cartIdGeneratorBehaviour validClientId validPassword cartId invalidClientId invalidPassword validClientId2 validPassword2'
+	instanceVariableNames: 'testObjectsFactory authenticateBehaviour cartIdGeneratorBehaviour validClientId validPassword cartId invalidClientId invalidPassword validClientId2 validPassword2 clock'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -265,27 +265,31 @@ createCartWithSystemFacade: systemFacade
 
 	^ systemFacade createCartWith: self clientId: validClientId password: validPassword! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/12/2022 22:24:18'!
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/13/2022 00:46:48'!
 createSystemFacade
 
-	^TusLibrosSystemFacade
-		withCatalog: testObjectsFactory defaultCatalog
-		throught: testObjectsFactory defaultMerchantProcessor
-		withTransactionIdGenerator: testObjectsFactory defaultTransactionIdGenerator.! !
+	^self createSystemFacadeWithTransactionIdGenerator: testObjectsFactory defaultTransactionIdGenerator.! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/12/2022 22:31:31'!
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/13/2022 01:04:47'!
 createSystemFacadeWithTransactionIdGenerator: aTransactionIdGenerator
 
 	^TusLibrosSystemFacade
 		withCatalog: testObjectsFactory defaultCatalog
 		throught: testObjectsFactory defaultMerchantProcessor
-		withTransactionIdGenerator: aTransactionIdGenerator.! !
+		withTransactionIdGenerator: aTransactionIdGenerator
+		withClock: clock.! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'auxiliary' stamp: 'id 6/13/2022 01:04:47'!
+forwardTime: aDuration 
+
+	clock forwardTime: aDuration.! !
 
 
-!TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'id 6/12/2022 23:26:18'!
+!TusLibrosSystemFacadeTest methodsFor: 'setup' stamp: 'id 6/13/2022 01:04:47'!
 setUp 
 
 	testObjectsFactory := StoreTestObjectsFactory new.
+	clock := Clock with: DateAndTime now.
 	validClientId := #validClientId.
 	validPassword := #validPassword.
 	validClientId2 := #validClientId2.
@@ -394,6 +398,46 @@ test14CannotAddBookToAlreadyCheckedOutCart
 			self assert: 1 equals: (cart occurrencesOf: book).
 		].! !
 
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/13/2022 00:39:16'!
+test20CannotAddBookToExpiredCart
+
+	| systemFacade book cart newCartId |
+
+	systemFacade := self createSystemFacade.
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	cart := systemFacade listCartWithId: newCartId.
+	book := testObjectsFactory itemSellByTheStore.
+
+	self forwardTime: (Duration minutes: 31).
+
+	self
+		should: [ systemFacade addToCart: newCartId aQuantity: 1 ofBook: book. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade cannotOperateOnExpiredCart equals: anError messageText.
+			self assert: cart isEmpty.
+		].! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/13/2022 01:28:55'!
+test23AddingBooksDelaysExpirationOfCart
+
+	| systemFacade book cart newCartId |
+
+	systemFacade := self createSystemFacade.
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	book := testObjectsFactory itemSellByTheStore.
+
+	self forwardTime: (Duration minutes: 25).
+	
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+
+	self forwardTime: (Duration minutes: 10).
+	
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+	cart := systemFacade listCartWithId: newCartId.
+
+	self assert: 2 equals: (cart occurrencesOf: book).! !
+
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 18:45:58'!
 test08CheckoutEmptyCartShouldRaiseError
@@ -462,6 +506,25 @@ test16CannotCheckoutAnAlreadyCheckedOutCart
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
 			self assert: TusLibrosSystemFacade invalidCartId equals: anError messageText.
+		].! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/13/2022 01:25:19'!
+test22CannotCheckoutAnExpiredCart
+
+	| systemFacade book newCartId |
+
+	systemFacade := self createSystemFacade.
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	book := testObjectsFactory itemSellByTheStore.
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+
+	self forwardTime: (Duration minutes: 31).
+
+	self
+		should: [ systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade cannotOperateOnExpiredCart equals: anError messageText.
 		].! !
 
 
@@ -561,6 +624,41 @@ test17ListCartReturnsCartsBooksWithQuantity
 	self
 		assert: expectedResult
 		equals: (systemFacade listCartWithId: newCartId).! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list cart' stamp: 'id 6/13/2022 01:21:54'!
+test21CannotListContentsOfAnExpiredCart
+
+	| systemFacade newCartId |
+
+	systemFacade := self createSystemFacade.
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	
+	self forwardTime: (Duration minutes: 31).
+
+	self
+		should: [ systemFacade listCartWithId: newCartId. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade cannotOperateOnExpiredCart equals: anError messageText.
+		].! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list cart' stamp: 'id 6/13/2022 02:14:13'!
+test24ListingCartDelaysItsExpiration
+
+	| systemFacade newCartId firstListing secondListing |
+
+	systemFacade := self createSystemFacade.
+	newCartId := self createCartWithSystemFacade: systemFacade.
+
+	self forwardTime: (Duration minutes: 25).
+	
+	firstListing := systemFacade listCartWithId: newCartId.
+
+	self forwardTime: (Duration minutes: 10).
+	
+	secondListing := systemFacade listCartWithId: newCartId.
+
+	self assert: firstListing = secondListing.! !
 
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'MYB 6/12/2022 14:31:26'!
@@ -707,12 +805,6 @@ isEmpty
 Cart class
 	instanceVariableNames: ''!
 
-!Cart class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 13:53:59'!
-acceptingItemsOf: aCatalog withOwner: aSymbol 
-	
-	^self new initializeAcceptingItemsOf: aCatalog withOwner: aSymbol ! !
-
-
 !Cart class methodsFor: 'error messages' stamp: 'id 6/12/2022 21:02:08'!
 invalidItemErrorMessage
 	
@@ -722,6 +814,12 @@ invalidItemErrorMessage
 invalidQuantityErrorMessage
 	
 	^'Invalid number of items'! !
+
+
+!Cart class methodsFor: 'instance creation' stamp: 'MYB 6/12/2022 13:53:59'!
+acceptingItemsOf: aCatalog withOwner: aSymbol 
+	
+	^self new initializeAcceptingItemsOf: aCatalog withOwner: aSymbol ! !
 
 
 !classDefinition: #Cashier category: 'TusLibros'!
@@ -820,6 +918,42 @@ toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate w
 		throught: aMerchantProcessor
 		with: aTransactionIdGenerator
 		registeringOn: aSalesBook.! !
+
+
+!classDefinition: #Clock category: 'TusLibros'!
+Object subclass: #Clock
+	instanceVariableNames: 'currentTime'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Clock methodsFor: 'accessing' stamp: 'id 6/13/2022 00:59:31'!
+now
+
+	^currentTime.! !
+
+
+!Clock methodsFor: 'initialization' stamp: 'id 6/13/2022 01:01:18'!
+initializeWith: aTime
+
+	currentTime := aTime.! !
+
+
+!Clock methodsFor: 'operations' stamp: 'id 6/13/2022 00:59:50'!
+forwardTime: aDuration
+
+	currentTime := currentTime + aDuration.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Clock class' category: 'TusLibros'!
+Clock class
+	instanceVariableNames: ''!
+
+!Clock class methodsFor: 'instance creation' stamp: 'id 6/13/2022 01:01:50'!
+with: aTime
+
+	^self new initializeWith: aTime.! !
 
 
 !classDefinition: #CreditCard category: 'TusLibros'!
@@ -1019,17 +1153,6 @@ itemSellByTheStorePrice
 	^10! !
 
 
-!StoreTestObjectsFactory methodsFor: 'transactionId generator' stamp: 'id 6/12/2022 22:20:21'!
-createTransactionIdGeneratorWith: aBlock
-
-	^TransactionIdGeneratorSimulator with: aBlock.! !
-
-!StoreTestObjectsFactory methodsFor: 'transactionId generator' stamp: 'id 6/12/2022 22:33:45'!
-defaultTransactionIdGenerator
-
-	^self createTransactionIdGeneratorWith: [ nil ].! !
-
-
 !StoreTestObjectsFactory methodsFor: 'merchant processor' stamp: 'id 6/12/2022 19:15:11'!
 createMerchantProcessorWith: aBlock
 
@@ -1043,18 +1166,48 @@ defaultMerchantProcessor
 		aCreditCard.
 	].! !
 
+
+!StoreTestObjectsFactory methodsFor: 'transactionId generator' stamp: 'id 6/12/2022 22:20:21'!
+createTransactionIdGeneratorWith: aBlock
+
+	^TransactionIdGeneratorSimulator with: aBlock.! !
+
+!StoreTestObjectsFactory methodsFor: 'transactionId generator' stamp: 'id 6/12/2022 22:33:45'!
+defaultTransactionIdGenerator
+
+	^self createTransactionIdGeneratorWith: [ nil ].! !
+
 
 !classDefinition: #TusLibrosSystemFacade category: 'TusLibros'!
 Object subclass: #TusLibrosSystemFacade
-	instanceVariableNames: 'catalog carts merchantProcessor salesBook transactionIdGenerator'
+	instanceVariableNames: 'catalog carts merchantProcessor salesBook transactionIdGenerator expirationTimeByCartId clock'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!TusLibrosSystemFacade methodsFor: 'assertions' stamp: 'id 6/13/2022 02:22:39'!
+assertCartIdIsNotExpired: aCartId
+	
+	| expirationTimeOfCartId |
+	
+	expirationTimeOfCartId := expirationTimeByCartId at: aCartId ifAbsent: [ self signalInvalidCartId. ].
+	
+	(self isCartIdExpired: expirationTimeOfCartId on: clock now) ifTrue: [ self signalCannotOperateOnExpiredCart. ].! !
 
 !TusLibrosSystemFacade methodsFor: 'assertions' stamp: 'id 6/12/2022 17:37:48'!
 assertValidCredentialsForAPI: anAPI clientId: aClientId password: aPassword
 
 	(anAPI authenticateWithClientId: aClientId password: aPassword) ifFalse: [ self signalCouldNotAuthenticateWithInvalidCredentials. ].! !
+
+!TusLibrosSystemFacade methodsFor: 'assertions' stamp: 'id 6/13/2022 02:05:57'!
+isCartIdExpired: expirationTimeOfCartId on: aTime 
+
+	^expirationTimeOfCartId < aTime.! !
+
+!TusLibrosSystemFacade methodsFor: 'assertions' stamp: 'id 6/13/2022 02:07:06'!
+signalCannotOperateOnExpiredCart
+
+	self error: self class cannotOperateOnExpiredCart.! !
 
 
 !TusLibrosSystemFacade methodsFor: 'exceptions' stamp: 'id 6/12/2022 20:35:57'!
@@ -1068,29 +1221,36 @@ signalInvalidCartId
 	self error: self class invalidCartId.! !
 
 
-!TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'id 6/12/2022 22:23:21'!
-initializeWithCatalog: aCatalog throught: aMerchantProcessor withTransactionIdGenerator: aTransactionIdGenerator 
+!TusLibrosSystemFacade methodsFor: 'initialize' stamp: 'id 6/13/2022 02:07:36'!
+initializeWithCatalog: aCatalog throught: aMerchantProcessor withTransactionIdGenerator: aTransactionIdGenerator withClock: aClock  
 
 	catalog := aCatalog.
 	merchantProcessor := aMerchantProcessor.
+	transactionIdGenerator := aTransactionIdGenerator.
+	clock := aClock.
 	carts := Dictionary new.
-	salesBook := OrderedCollection new.
-	transactionIdGenerator := aTransactionIdGenerator.! !
+	expirationTimeByCartId := Dictionary new.
+	salesBook := OrderedCollection new.! !
 
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:41:24'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/13/2022 02:08:19'!
 addToCart: aCartId aQuantity: aQuantity ofBook: aBook
 
 	| cart |
 
 	cart := self getCartWithIdIfPresent: aCartId.
+	self assertCartIdIsNotExpired: aCartId.
 
-	cart add: aQuantity of: aBook.! !
+	cart add: aQuantity of: aBook.
+	
+	self updateExpirationOf: aCartId.! !
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 23:10:59'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/13/2022 01:25:44'!
 checkoutWithCartId: aCartId charging: aCreditCard 
 	
 	| cart cashier sale |
+
+	self assertCartIdIsNotExpired: aCartId.
 
 	cart := self getCartWithIdIfPresent: aCartId.
 
@@ -1108,7 +1268,7 @@ checkoutWithCartId: aCartId charging: aCreditCard
 	
 	^sale transactionId.! !
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 13:52:53'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/13/2022 02:11:58'!
 createCartWith: anAPI clientId: aClientId password: aPassword
 	
 	| cartId cart |
@@ -1118,14 +1278,22 @@ createCartWith: anAPI clientId: aClientId password: aPassword
 	cart := Cart acceptingItemsOf: catalog withOwner: aClientId.
 	
 	carts add: cartId->cart.
-	
-	^ cartId
-	! !
+	self updateExpirationOf: cartId.
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:59:39'!
+	^cartId.! !
+
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/13/2022 02:14:52'!
 listCartWithId: aCartId 
 	
-	^(self getCartWithIdIfPresent: aCartId) items.! !
+	| items |
+
+	self assertCartIdIsNotExpired: aCartId.
+
+	items := (self getCartWithIdIfPresent: aCartId) items.
+	
+	self updateExpirationOf: aCartId.
+	
+	^items.! !
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 14:48:08'!
 listPurchasesWith: anAPI clientId: aClientId password: aPassword 
@@ -1136,21 +1304,39 @@ listPurchasesWith: anAPI clientId: aClientId password: aPassword
 	! !
 
 
+!TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/13/2022 01:17:28'!
+computeExpirationTime
+
+	^clock now + self class lifespanOfCartId.! !
+
 !TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/12/2022 20:41:24'!
 getCartWithIdIfPresent: aCartId
 
 	^ carts at: aCartId ifAbsent: [ self signalInvalidCartId. ]! !
 
-!TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/12/2022 20:36:44'!
+!TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/13/2022 02:20:53'!
 invalidateCartId: aCartId
 
-	^ carts removeKey: aCartId! !
+	carts removeKey: aCartId.
+	expirationTimeByCartId removeKey: aCartId.! !
+
+!TusLibrosSystemFacade methodsFor: 'operations - private' stamp: 'id 6/13/2022 02:09:45'!
+updateExpirationOf: aCartId
+
+	expirationTimeByCartId
+		at: aCartId
+		put: self computeExpirationTime.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'TusLibrosSystemFacade class' category: 'TusLibros'!
 TusLibrosSystemFacade class
 	instanceVariableNames: ''!
+
+!TusLibrosSystemFacade class methodsFor: 'error descriptions' stamp: 'id 6/13/2022 00:41:59'!
+cannotOperateOnExpiredCart
+
+	^'Cannot operate on expired cart.'.! !
 
 !TusLibrosSystemFacade class methodsFor: 'error descriptions' stamp: 'MYB 6/9/2022 21:30:04'!
 couldNotAuthenticateWithInvalidCredentials
@@ -1163,10 +1349,17 @@ invalidCartId
 	^'Invalid cart id'.! !
 
 
-!TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'id 6/12/2022 22:23:41'!
-withCatalog: aCatalog throught: aMerchantProcessor withTransactionIdGenerator: aTransactionIdGenerator 
+!TusLibrosSystemFacade class methodsFor: 'id expiration' stamp: 'id 6/13/2022 01:15:39'!
+lifespanOfCartId
+
+	^Duration minutes: 30.! !
+
+
+!TusLibrosSystemFacade class methodsFor: 'instance creation' stamp: 'id 6/13/2022 00:45:33'!
+withCatalog: aCatalog throught: aMerchantProcessor withTransactionIdGenerator: aTransactionIdGenerator withClock: aClock  
 
 	^self new
 		initializeWithCatalog: aCatalog
 		throught: aMerchantProcessor
-		withTransactionIdGenerator: aTransactionIdGenerator.! !
+		withTransactionIdGenerator: aTransactionIdGenerator
+		withClock: aClock.! !
