@@ -16,7 +16,7 @@ test01NewCartsAreCreatedEmpty
 
 	self assert: testObjectsFactory createCart isEmpty! !
 
-!CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
+!CartTest methodsFor: 'tests' stamp: 'id 6/12/2022 21:02:27'!
 test02CanNotAddItemsThatDoNotBelongToStore
 
 	| cart |
@@ -27,8 +27,8 @@ test02CanNotAddItemsThatDoNotBelongToStore
 		should: [ cart add: testObjectsFactory itemNotSellByTheStore ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
-			self assert: cart isEmpty ]! !
+			self assert: anError messageText = Cart invalidItemErrorMessage.
+			self assert: cart isEmpty ].! !
 
 !CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
 test03AfterAddingAnItemTheCartIsNotEmptyAnymore
@@ -40,7 +40,7 @@ test03AfterAddingAnItemTheCartIsNotEmptyAnymore
 	cart add: testObjectsFactory itemSellByTheStore.
 	self deny: cart isEmpty ! !
 
-!CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
+!CartTest methodsFor: 'tests' stamp: 'id 6/12/2022 21:03:52'!
 test04CanNotAddNonPositiveNumberOfItems
 
 	| cart |
@@ -51,10 +51,10 @@ test04CanNotAddNonPositiveNumberOfItems
 		should: [cart add: 0 of: testObjectsFactory itemSellByTheStore ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidQuantityErrorMessage.
-			self assert: cart isEmpty ]! !
+			self assert: anError messageText = Cart invalidQuantityErrorMessage.
+			self assert: cart isEmpty ].! !
 
-!CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:10'!
+!CartTest methodsFor: 'tests' stamp: 'id 6/12/2022 21:04:02'!
 test05CanNotAddMoreThanOneItemNotSellByTheStore
 
 	| cart |
@@ -65,8 +65,8 @@ test05CanNotAddMoreThanOneItemNotSellByTheStore
 		should: [cart add: 2 of: testObjectsFactory itemNotSellByTheStore  ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cart invalidItemErrorMessage.
-			self assert: cart isEmpty ]! !
+			self assert: anError messageText = Cart invalidItemErrorMessage.
+			self assert: cart isEmpty ].! !
 
 !CartTest methodsFor: 'tests' stamp: 'HernanWilkinson 6/17/2013 18:11'!
 test06CartRemembersAddedItems
@@ -292,7 +292,7 @@ generateCartId
 	^cartIdGeneratorBehaviour value.! !
 
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 18:46:07'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 21:04:21'!
 test06AddingInvalidBookToCartShouldRaiseError
 
 	| systemFacade book cart newCartId quantity |
@@ -308,7 +308,7 @@ test06AddingInvalidBookToCartShouldRaiseError
 		should: [systemFacade addToCart: newCartId aQuantity: quantity ofBook: book ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: cart invalidItemErrorMessage equals: anError messageText.
+			self assert: Cart invalidItemErrorMessage equals: anError messageText.
 			self assert: cart isEmpty
 		].! !
 
@@ -328,7 +328,7 @@ test07AddingBooksToCartShouldAddBooksToCart
 
 	self assert: quantity equals: (cart occurrencesOf: book).! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 20:23:35'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - add to cart' stamp: 'id 6/12/2022 21:04:28'!
 test13CannotAddNonPositiveAmountOfBooksToCart
 
 	| systemFacade book cart newCartId |
@@ -343,7 +343,7 @@ test13CannotAddNonPositiveAmountOfBooksToCart
 		should: [ systemFacade addToCart: newCartId aQuantity: 0 ofBook: book. ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: cart invalidQuantityErrorMessage equals: anError messageText.
+			self assert: Cart invalidQuantityErrorMessage equals: anError messageText.
 			self assert: cart isEmpty.
 		].! !
 
@@ -386,17 +386,17 @@ test08CheckoutEmptyCartShouldRaiseError
 			self assert: Cashier cartCanNotBeEmptyErrorMessage equals: anError messageText.
 		].! !
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 18:46:25'!
+!TusLibrosSystemFacadeTest methodsFor: 'tests - checkout' stamp: 'id 6/12/2022 21:12:39'!
 test09CheckoutWithInvalidCardShouldRaiseError
 
 	| systemFacade newCartId |
-	
+
 	systemFacade := self createSystemFacade.
-	
+
 	newCartId := self createCartWithSystemFacade: systemFacade.
 	systemFacade addToCart: newCartId aQuantity: 3 ofBook: testObjectsFactory itemSellByTheStore.
 
-	self 
+	self
 		should: [systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory expiredCreditCard ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
@@ -499,23 +499,44 @@ test04CreateCartShouldReturnCartIdForAnEmptyCart
 	! !
 
 
-!TusLibrosSystemFacadeTest methodsFor: 'tests - list cart' stamp: 'MYB 6/12/2022 12:57:46'!
-test05ListingTwoDifferentCartsShouldReturnDifferentCarts
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list cart' stamp: 'id 6/12/2022 20:39:27'!
+test15CannotListAnAlreadyCheckedOutCart
 
-	| systemFacade cart1 cart2 newCartId1 newCartId2 |
-	
+	| systemFacade book newCartId |
+
 	systemFacade := self createSystemFacade.
-	
-	newCartId1 := self createCartWithSystemFacade: systemFacade.
-	newCartId2 := self createCartWithSystemFacade: systemFacade.
-	
-	cart1 := systemFacade listCartWithId: newCartId1.
-	cart2 := systemFacade listCartWithId: newCartId2.
-	
-	self deny: cart1 = cart2
-	
-	
-	! !
+
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	book := testObjectsFactory itemSellByTheStore.
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
+	systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard.
+
+	self
+		should: [ systemFacade listCartWithId: newCartId. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: TusLibrosSystemFacade invalidCartId equals: anError messageText.
+		].! !
+
+!TusLibrosSystemFacadeTest methodsFor: 'tests - list cart' stamp: 'id 6/12/2022 20:59:23'!
+test17ListCartReturnsCartsBooksWithQuantity
+
+	| systemFacade book1 book2 newCartId expectedResult |
+
+	systemFacade := self createSystemFacade.
+	newCartId := self createCartWithSystemFacade: systemFacade.
+	book1 := testObjectsFactory itemSellByTheStore.
+	book2 := testObjectsFactory itemSellByTheStore.
+	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book1.
+	systemFacade addToCart: newCartId aQuantity: 2 ofBook: book2.
+
+	expectedResult := Bag new.
+	expectedResult add: book1 withOccurrences: 1.
+	expectedResult add: book2 withOccurrences: 2.
+
+	self
+		assert: expectedResult
+		equals: (systemFacade listCartWithId: newCartId).! !
 
 
 !TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'MYB 6/12/2022 14:31:26'!
@@ -543,25 +564,6 @@ test12ListPurchasesOfClientShouldReturnItsPurchases
 	self assert: validClientId equals: sale client.
 	self assert: (Bag new add: testObjectsFactory itemSellByTheStore withOccurrences: 3;yourself) equals: sale items.
 	self assert: 30 equals: sale total.! !
-
-!TusLibrosSystemFacadeTest methodsFor: 'tests - list purchases' stamp: 'id 6/12/2022 20:39:27'!
-test15CannotListAnAlreadyCheckedOutCart
-
-	| systemFacade book newCartId |
-
-	systemFacade := self createSystemFacade.
-
-	newCartId := self createCartWithSystemFacade: systemFacade.
-	book := testObjectsFactory itemSellByTheStore.
-	systemFacade addToCart: newCartId aQuantity: 1 ofBook: book.
-	systemFacade checkoutWithCartId: newCartId charging: testObjectsFactory notExpiredCreditCard.
-
-	self
-		should: [ systemFacade listCartWithId: newCartId. ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: TusLibrosSystemFacade invalidCartId equals: anError messageText.
-		].! !
 
 
 !classDefinition: #Cart category: 'TusLibros'!
@@ -601,26 +603,15 @@ add: aQuantity of: anItem
 	items add: anItem withOccurrences: aQuantity.! !
 
 
-!Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 18:06'!
+!Cart methodsFor: 'assertions' stamp: 'id 6/12/2022 21:03:12'!
 assertIsValidItem: anItem
 
-	(catalog includesKey: anItem) ifFalse: [ self error: self invalidItemErrorMessage ]! !
+	(catalog includesKey: anItem) ifFalse: [ self error: self class invalidItemErrorMessage. ].! !
 
-!Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 17:51'!
+!Cart methodsFor: 'assertions' stamp: 'id 6/12/2022 21:03:36'!
 assertIsValidQuantity: aQuantity
 
-	aQuantity strictlyPositive ifFalse: [ self error: self invalidQuantityErrorMessage ]! !
-
-
-!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-invalidItemErrorMessage
-	
-	^'Item is not in catalog'! !
-
-!Cart methodsFor: 'error messages' stamp: 'HernanWilkinson 6/17/2013 17:45'!
-invalidQuantityErrorMessage
-	
-	^'Invalid number of items'! !
+	aQuantity strictlyPositive ifFalse: [ self error: self class invalidQuantityErrorMessage. ].! !
 
 
 !Cart methodsFor: 'initialization' stamp: 'MYB 6/12/2022 15:33:58'!
@@ -663,6 +654,17 @@ Cart class
 acceptingItemsOf: aCatalog withOwner: aSymbol 
 	
 	^self new initializeAcceptingItemsOf: aCatalog withOwner: aSymbol ! !
+
+
+!Cart class methodsFor: 'error messages' stamp: 'id 6/12/2022 21:02:08'!
+invalidItemErrorMessage
+	
+	^'Item is not in catalog'! !
+
+!Cart class methodsFor: 'error messages' stamp: 'id 6/12/2022 21:03:26'!
+invalidQuantityErrorMessage
+	
+	^'Invalid number of items'! !
 
 
 !classDefinition: #Cashier category: 'TusLibros'!
@@ -1008,10 +1010,10 @@ createCartWith: anAPI clientId: aClientId password: aPassword
 	^ cartId
 	! !
 
-!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:41:24'!
+!TusLibrosSystemFacade methodsFor: 'operations' stamp: 'id 6/12/2022 20:59:39'!
 listCartWithId: aCartId 
 	
-	^self getCartWithIdIfPresent: aCartId.! !
+	^(self getCartWithIdIfPresent: aCartId) items.! !
 
 !TusLibrosSystemFacade methodsFor: 'operations' stamp: 'MYB 6/12/2022 14:48:08'!
 listPurchasesWith: anAPI clientId: aClientId password: aPassword 
