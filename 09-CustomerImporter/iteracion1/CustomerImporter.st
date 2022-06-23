@@ -19,28 +19,94 @@ assertCustomer: importedCustomer firstName: firstName lastName: lastName
 	self assert: firstName equals: importedCustomer firstName.
 	self assert: lastName equals: importedCustomer lastName! !
 
-!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 21:17:08'!
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 22:24:31'!
 assertFirstCustomerAndTheirAddressesWereCorrectlyImported
 
-	self assertHasCustomerIdentifiedWith: '22333444' identificationType: 'D' firstName: 'Pepe' lastName: 'Sanchez'.
+	| importedCustomer address |
 	
-	self assertAddress: ((self getCustomerWith: '22333444' andType: 'D') getAddressesAt: 'San Martin') anyOne streetNumber: 3322 town: 'Olivos' zipCode: 1636 province: 'BsAs'.
+	self
+		assertHasCustomerIdentifiedWith: '22333444'
+		identificationType: 'D'
+		firstName: 'Pepe'
+		lastName: 'Sanchez'.
 	
-	self assertAddress: ((self getCustomerWith: '22333444' andType: 'D') getAddressesAt: 'Maipu') anyOne streetNumber: 888 town: 'Florida' zipCode: 1122 province: 'Buenos Aires'! !
+	importedCustomer := self getCustomerWith: '22333444' andType: 'D'.
+	address := importedCustomer getAddressAt: 'San Martin'.
 
-!ImportTest methodsFor: 'assertions' stamp: 'id 6/16/2022 21:45:42'!
+	self
+		assertAddress: address
+		streetNumber: 3322
+		town: 'Olivos'
+		zipCode: 1636
+		province: 'BsAs'.
+
+	address := importedCustomer getAddressAt: 'Maipu'.
+
+	self
+		assertAddress: address
+		streetNumber: 888
+		town: 'Florida'
+		zipCode: 1122
+		province: 'Buenos Aires'.
+
+
+! !
+
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 22:12:46'!
 assertHasCustomerIdentifiedWith: identificationNumber identificationType: identificationType firstName: firstName lastName: lastName
 
 	| importedCustomer |
-	importedCustomer := self getCustomerWith: identificationNumber andType: identificationType.
-	^ self assertCustomer: importedCustomer firstName: firstName lastName: lastName! !
 
-!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 21:17:22'!
+	importedCustomer := self getCustomerWith: identificationNumber andType: identificationType.	
+
+	self assertCustomer: importedCustomer firstName: firstName lastName: lastName.! !
+
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 22:23:42'!
 assertSecondCustomerAndTheirAddressesWereCorrectlyImported
 
-	self assertHasCustomerIdentifiedWith: '23-25666777-9' identificationType: 'C' firstName: 'Juan' lastName: 'Perez'.
-	
-	self assertAddress: ((self getCustomerWith: '23-25666777-9' andType: 'C') getAddressesAt: 'Alem') anyOne streetNumber: 1122 town: 'CABA' zipCode: 1001 province: 'CABA'! !
+	| importedCustomer address |
+
+	self
+		assertHasCustomerIdentifiedWith: '23-25666777-9'
+		identificationType: 'C'
+		firstName: 'Juan'
+		lastName: 'Perez'.
+
+	importedCustomer := self getCustomerWith: '23-25666777-9' andType: 'C'.
+	address := importedCustomer getAddressAt: 'Alem'.
+
+	self
+		assertAddress: address
+		streetNumber: 1122
+		town: 'CABA'
+		zipCode: 1001
+		province: 'CABA'.
+
+
+
+! !
+
+
+!ImportTest methodsFor: 'auxiliary' stamp: 'id 6/22/2022 22:19:47'!
+getCustomerWith: identificationNumber andType: identificationType 
+
+	^(session
+		select: [ :aCustomer | aCustomer isIdentifiedWith:  identificationNumber andType: identificationType. ]
+		ofType: Customer) anyOne.! !
+
+!ImportTest methodsFor: 'auxiliary' stamp: 'id 6/22/2022 21:27:14'!
+importCustomers: stream
+
+	^(CustomerImporter from: stream to: session) compute.! !
+
+!ImportTest methodsFor: 'auxiliary' stamp: 'id 6/16/2022 21:00:37'!
+stream
+
+	^ ReadStream on: 'C,Pepe,Sanchez,D,22333444
+A,San Martin,3322,Olivos,1636,BsAs
+A,Maipu,888,Florida,1122,Buenos Aires
+C,Juan,Perez,C,23-25666777-9
+A,Alem,1122,CABA,1001,CABA'! !
 
 
 !ImportTest methodsFor: 'setUp' stamp: 'id 6/16/2022 20:42:08'!
@@ -74,28 +140,6 @@ test01Import
 	
 	! !
 
-
-!ImportTest methodsFor: 'tests - auxiliary' stamp: 'id 6/16/2022 21:10:39'!
-getCustomerWith: identificationNumber andType: identificationType 
-
-	^ ((session selectAllOfType: Customer) select: [ :aCustomer |
-		aCustomer isIdentifiedWith:  identificationNumber andType: identificationType.
-	 ]) anyOne.! !
-
-!ImportTest methodsFor: 'tests - auxiliary' stamp: 'id 6/22/2022 21:27:14'!
-importCustomers: stream
-
-	^(CustomerImporter from: stream to: session) compute.! !
-
-!ImportTest methodsFor: 'tests - auxiliary' stamp: 'id 6/16/2022 21:00:37'!
-stream
-
-	^ ReadStream on: 'C,Pepe,Sanchez,D,22333444
-A,San Martin,3322,Olivos,1636,BsAs
-A,Maipu,888,Florida,1122,Buenos Aires
-C,Juan,Perez,C,23-25666777-9
-A,Alem,1122,CABA,1001,CABA'! !
-
 
 !classDefinition: #Address category: 'CustomerImporter'!
 Object subclass: #Address
@@ -103,11 +147,6 @@ Object subclass: #Address
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'CustomerImporter'!
-
-!Address methodsFor: 'province' stamp: 'id 6/16/2022 21:12:30'!
-isAt: aStreetName
-
-	^streetName = aStreetName.! !
 
 !Address methodsFor: 'province' stamp: 'HAW 5/22/2022 00:19:29'!
 province
@@ -142,12 +181,18 @@ streetNumber: aStreetNumber
 	streetNumber := aStreetNumber ! !
 
 
-!Address methodsFor: 'twon' stamp: 'HAW 5/22/2022 00:19:29'!
+!Address methodsFor: 'testing' stamp: 'id 6/16/2022 21:12:30'!
+isAt: aStreetName
+
+	^streetName = aStreetName.! !
+
+
+!Address methodsFor: 'town' stamp: 'HAW 5/22/2022 00:19:29'!
 town
 
 	^town! !
 
-!Address methodsFor: 'twon' stamp: 'HAW 5/22/2022 00:19:29'!
+!Address methodsFor: 'town' stamp: 'HAW 5/22/2022 00:19:29'!
 town: aTown
 
 	town := aTown! !
@@ -181,15 +226,10 @@ addresses
 
 	^ addresses! !
 
-!Customer methodsFor: 'addresses' stamp: 'id 6/16/2022 21:15:55'!
-getAddressesAt: aStreetName
+!Customer methodsFor: 'addresses' stamp: 'id 6/22/2022 22:22:23'!
+getAddressAt: aStreetName
 
-	^addresses select: [ :anAddress | anAddress isAt: aStreetName. ].! !
-
-!Customer methodsFor: 'addresses' stamp: 'id 6/16/2022 21:09:34'!
-isIdentifiedWith: anIdentificationNumber andType: anIdentificationType
-
-	^identificationNumber= anIdentificationNumber and: [ identificationType = anIdentificationType].! !
+	^(addresses select: [ :anAddress | anAddress isAt: aStreetName. ]) anyOne.! !
 
 
 !Customer methodsFor: 'name' stamp: 'HAW 5/22/2022 00:19:29'!
@@ -235,6 +275,12 @@ identificationType: anIdentificationType
 	identificationType := anIdentificationType! !
 
 
+!Customer methodsFor: 'testing' stamp: 'id 6/22/2022 22:15:24'!
+isIdentifiedWith: anIdentificationNumber andType: anIdentificationType
+
+	^identificationNumber = anIdentificationNumber and: [identificationType = anIdentificationType].! !
+
+
 !Customer methodsFor: 'initialization' stamp: 'HAW 5/22/2022 00:19:29'!
 initialize
 
@@ -249,18 +295,20 @@ Object subclass: #CustomerImporter
 	poolDictionaries: ''
 	category: 'CustomerImporter'!
 
-!CustomerImporter methodsFor: 'initialization' stamp: 'id 6/16/2022 21:03:25'!
+!CustomerImporter methodsFor: 'initialization' stamp: 'id 6/22/2022 22:15:58'!
 initializeFrom: aStream to: aSession
+
 	session := aSession.
 	stream := aStream.! !
 
 
-!CustomerImporter methodsFor: 'evaluating' stamp: 'id 6/22/2022 21:20:19'!
+!CustomerImporter methodsFor: 'evaluating' stamp: 'id 6/22/2022 22:26:24'!
 compute
 
 	| newCustomer line |
 
 	line := stream nextLine.
+
 	[ line notNil ] whileTrue: [
 		(line beginsWith: 'C') ifTrue: [ | customerData |
 			customerData := line findTokens: $,.
