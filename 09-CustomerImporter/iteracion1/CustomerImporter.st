@@ -5,7 +5,7 @@ TestCase subclass: #ImportTest
 	poolDictionaries: ''
 	category: 'CustomerImporter'!
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:21:16'!
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/16/2022 21:21:16'!
 assertAddress: importedAddress streetNumber: streetNumber town: town zipCode: zipCode province: province    
 
 	self assert: streetNumber equals: importedAddress streetNumber.
@@ -13,69 +13,58 @@ assertAddress: importedAddress streetNumber: streetNumber town: town zipCode: zi
 	self assert: zipCode equals: importedAddress zipCode.
 	self assert: province equals: importedAddress province! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:19:00'!
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/16/2022 21:19:00'!
 assertCustomer: importedCustomer firstName: firstName lastName: lastName  
 
 	self assert: firstName equals: importedCustomer firstName.
 	self assert: lastName equals: importedCustomer lastName! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:45:42'!
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 21:17:08'!
+assertFirstCustomerAndTheirAddressesWereCorrectlyImported
+
+	self assertHasCustomerIdentifiedWith: '22333444' identificationType: 'D' firstName: 'Pepe' lastName: 'Sanchez'.
+	
+	self assertAddress: ((self getCustomerWith: '22333444' andType: 'D') getAddressesAt: 'San Martin') anyOne streetNumber: 3322 town: 'Olivos' zipCode: 1636 province: 'BsAs'.
+	
+	self assertAddress: ((self getCustomerWith: '22333444' andType: 'D') getAddressesAt: 'Maipu') anyOne streetNumber: 888 town: 'Florida' zipCode: 1122 province: 'Buenos Aires'! !
+
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/16/2022 21:45:42'!
 assertHasCustomerIdentifiedWith: identificationNumber identificationType: identificationType firstName: firstName lastName: lastName
 
 	| importedCustomer |
 	importedCustomer := self getCustomerWith: identificationNumber andType: identificationType.
 	^ self assertCustomer: importedCustomer firstName: firstName lastName: lastName! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:10:39'!
-getCustomerWith: identificationNumber andType: identificationType 
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/22/2022 21:17:22'!
+assertSecondCustomerAndTheirAddressesWereCorrectlyImported
 
-	^ ((session selectAllOfType: Customer) select: [ :aCustomer |
-		aCustomer isIdentifiedWith:  identificationNumber andType: identificationType.
-	 ]) anyOne.! !
+	self assertHasCustomerIdentifiedWith: '23-25666777-9' identificationType: 'C' firstName: 'Juan' lastName: 'Perez'.
+	
+	self assertAddress: ((self getCustomerWith: '23-25666777-9' andType: 'C') getAddressesAt: 'Alem') anyOne streetNumber: 1122 town: 'CABA' zipCode: 1001 province: 'CABA'! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:03:25'!
-importCustomers: stream
-	(CustomerImporter from: stream to: session) compute! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 20:42:08'!
+!ImportTest methodsFor: 'setUp' stamp: 'id 6/16/2022 20:42:08'!
 setUp
 
 	session := DataBaseSession for: (Array with: Address with: Customer).
 	session beginTransaction! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:00:37'!
-stream
 
-	^ ReadStream on: 'C,Pepe,Sanchez,D,22333444
-A,San Martin,3322,Olivos,1636,BsAs
-A,Maipu,888,Florida,1122,Buenos Aires
-C,Juan,Perez,C,23-25666777-9
-A,Alem,1122,CABA,1001,CABA'! !
-
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 20:42:29'!
+!ImportTest methodsFor: 'tearDown' stamp: 'id 6/22/2022 21:21:05'!
 tearDown
 
 	session commit.
-	session close! !
+	session close.! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'id 6/16/2022 21:47:20'!
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/22/2022 21:26:59'!
 test01Import
 
-	| importedAddress |
-	self importCustomers: (self stream).
+	self importCustomers: self stream.
 	
-	self assertHasCustomerIdentifiedWith: '22333444' identificationType: 'D' firstName: 'Pepe' lastName: 'Sanchez'.
+	self assertFirstCustomerAndTheirAddressesWereCorrectlyImported.
 	
-	importedAddress := ((self getCustomerWith: '22333444' andType: 'D') getAddressesAt: 'San Martin') anyOne.
-	self assertAddress: importedAddress streetNumber: 3322 town: 'Olivos' zipCode: 1636 province: 'BsAs'.
-	
-	importedAddress := ((self getCustomerWith: '22333444' andType: 'D') getAddressesAt: 'Maipu') anyOne.
-	self assertAddress: importedAddress streetNumber: 888 town: 'Florida' zipCode: 1122 province: 'Buenos Aires'.
-	
-	self assertHasCustomerIdentifiedWith: '23-25666777-9' identificationType: 'C' firstName: 'Juan' lastName: 'Perez'.
-	
-	importedAddress := ((self getCustomerWith: '23-25666777-9' andType: 'C') getAddressesAt: 'Alem') anyOne.
-	self assertAddress: importedAddress streetNumber: 1122 town: 'CABA' zipCode: 1001 province: 'CABA'.
+	self assertSecondCustomerAndTheirAddressesWereCorrectlyImported.
 	
 	
 	
@@ -84,6 +73,28 @@ test01Import
 	
 	
 	! !
+
+
+!ImportTest methodsFor: 'tests - auxiliary' stamp: 'id 6/16/2022 21:10:39'!
+getCustomerWith: identificationNumber andType: identificationType 
+
+	^ ((session selectAllOfType: Customer) select: [ :aCustomer |
+		aCustomer isIdentifiedWith:  identificationNumber andType: identificationType.
+	 ]) anyOne.! !
+
+!ImportTest methodsFor: 'tests - auxiliary' stamp: 'id 6/22/2022 21:27:14'!
+importCustomers: stream
+
+	^(CustomerImporter from: stream to: session) compute.! !
+
+!ImportTest methodsFor: 'tests - auxiliary' stamp: 'id 6/16/2022 21:00:37'!
+stream
+
+	^ ReadStream on: 'C,Pepe,Sanchez,D,22333444
+A,San Martin,3322,Olivos,1636,BsAs
+A,Maipu,888,Florida,1122,Buenos Aires
+C,Juan,Perez,C,23-25666777-9
+A,Alem,1122,CABA,1001,CABA'! !
 
 
 !classDefinition: #Address category: 'CustomerImporter'!
@@ -244,12 +255,9 @@ initializeFrom: aStream to: aSession
 	stream := aStream.! !
 
 
-!CustomerImporter methodsFor: 'evaluating' stamp: 'id 6/16/2022 21:03:25'!
+!CustomerImporter methodsFor: 'evaluating' stamp: 'id 6/22/2022 21:20:19'!
 compute
 
-	"
-	self importCustomers
-	"
 	| newCustomer line |
 
 	line := stream nextLine.
