@@ -5,112 +5,6 @@ TestCase subclass: #ImportTest
 	poolDictionaries: ''
 	category: 'CustomerImporter'!
 
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 19:12:19'!
-test01ValidDataIsImportedCorrectly
-
-	CustomerImporter valueFrom: self validImportData into: session.
-
-	self 
-		assertImportedRightNumberOfCustomers;
-		assertPepeSanchezWasImportedCorrecty;
-		assertJuanPerezWasImportedCorrectly.! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 21:02:59'!
-test02CustomerRecordMustBeOnlyC
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidCustomerRecordWrongType into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: CustomerImporter invalidRecordTypeErrorDescription equals: anError messageText.
-			self assert: 0 equals: (session selectAllOfType: Customer) size.
-		]
-		! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 21:02:47'!
-test03AddressRecordMustBeOnlyA
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidAddressRecordWrongType into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: CustomerImporter invalidRecordTypeErrorDescription equals: anError messageText.
-			self assert: 1 equals: (session selectAllOfType: Customer) size.
-			self assert: 0 equals: (session selectAllOfType: Address) size.
-		]
-		! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 20:02:06'!
-test04AddressRecordMustHasPreviousCustomerRecord
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidAddressRecordWithoutPreviousCustomerRecord into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self 
-				assert: CustomerImporter addressRecordMustHavePreviousCustomerRecordErrorDescription 
-				equals: anError messageText.
-			self assert: 0 equals: (session selectAllOfType: Address) size.
-		]
-		! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 20:52:20'!
-test05CustomerRecordMustNotHaveLessThanFiveFields
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidCustomerRecordWithLessThanFiveFields into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self 
-				assert: CustomerImporter customerRecordInvalidQuantityOfFieldsErrorDescription 
-				equals: anError messageText.
-			self assert: 0 equals: (session selectAllOfType: Customer) size.
-		]
-		! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 20:52:20'!
-test06CustomerRecordMustNotHaveMoreThanFiveFields
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidCustomerRecordWithMoreThanFiveFields into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self 
-				assert: CustomerImporter customerRecordInvalidQuantityOfFieldsErrorDescription 
-				equals: anError messageText.
-			self assert: 0 equals: (session selectAllOfType: Customer) size.
-		]
-		! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 21:02:17'!
-test07AddressRecordMustNotHaveLessThanSixFields
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidAddressRecordWithLessThanSixFields into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self 
-				assert: CustomerImporter addressRecordInvalidQuantityOfFieldsErrorDescription 
-				equals: anError messageText.
-			self assert: 0 equals: (session selectAllOfType: Address) size.
-		]
-		! !
-
-!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 20:58:11'!
-test08AddressRecordMustNotHaveMoreThanSixFields
-
-	self 
-		should: [ CustomerImporter valueFrom: self invalidAddressRecordWithMoreThanSixFields into: session ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self 
-				assert: CustomerImporter addressRecordInvalidQuantityOfFieldsErrorDescription 
-				equals: anError messageText.
-			self assert: 0 equals: (session selectAllOfType: Address) size.
-		]
-		! !
-
-
 !ImportTest methodsFor: 'assertions' stamp: 'HAW 5/22/2022 18:22:05'!
 assertAddressOf: importedCustomer at: aStreetName hasNumber: aNumber town: aTown zipCode: aZipCode province: aProvince
 
@@ -155,6 +49,21 @@ assertJuanPerezWasImportedCorrectly
 	self assertAddressOf: importedCustomer at: 'Alem' hasNumber: 1122 town: 'CABA' zipCode: 1001 province: 'CABA'
 	! !
 
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/26/2022 20:44:12'!
+assertNoAddressHasBeenImported
+
+	self assert: 0 equals: (session selectAllOfType: Address) size.! !
+
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/26/2022 20:42:57'!
+assertNoCustomerHasBeenImported
+
+	self assert: 0 equals: (session selectAllOfType: Customer) size.! !
+
+!ImportTest methodsFor: 'assertions' stamp: 'id 6/26/2022 21:45:47'!
+assertOnlyOneCustomerHasBeenImported
+
+	^ self assert: 1 equals: (session selectAllOfType: Customer) size! !
+
 !ImportTest methodsFor: 'assertions' stamp: 'HAW 5/22/2022 18:28:05'!
 assertPepeSanchezWasImportedCorrecty
 
@@ -166,6 +75,31 @@ assertPepeSanchezWasImportedCorrecty
 
 
 	! !
+
+
+!ImportTest methodsFor: 'auxiliary' stamp: 'id 6/26/2022 21:26:23'!
+importFrom: aStream
+
+	^CustomerImporter valueFrom: aStream into: session.! !
+
+!ImportTest methodsFor: 'auxiliary' stamp: 'id 6/26/2022 21:32:11'!
+importingFrom: aStream shouldRaiseErrorWithMessage: anErrorMessage andAssert: anAssertionsBlock  
+
+	self 
+		should: [ self importFrom: aStream. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anErrorMessage equals: anError messageText.
+			anAssertionsBlock value.
+		].! !
+
+
+!ImportTest methodsFor: 'customer' stamp: 'HAW 5/22/2022 18:14:22'!
+customerWithIdentificationType: anIdType number: anIdNumber
+
+	^ (session
+		select: [ :aCustomer | aCustomer identificationType = anIdType and: [ aCustomer identificationNumber = anIdNumber ]]
+		ofType: Customer) anyOne! !
 
 
 !ImportTest methodsFor: 'setUp/tearDown' stamp: 'HAW 5/22/2022 00:27:50'!
@@ -181,14 +115,6 @@ tearDown
 	session commit.
 	session close.
 	! !
-
-
-!ImportTest methodsFor: 'customer' stamp: 'HAW 5/22/2022 18:14:22'!
-customerWithIdentificationType: anIdType number: anIdNumber
-
-	^ (session
-		select: [ :aCustomer | aCustomer identificationType = anIdType and: [ aCustomer identificationNumber = anIdNumber ]]
-		ofType: Customer) anyOne! !
 
 
 !ImportTest methodsFor: 'test data' stamp: 'MYB 6/23/2022 21:02:17'!
@@ -241,6 +167,76 @@ A,San Martin,3322,Olivos,1636,BsAs
 A,Maipu,888,Florida,1122,Buenos Aires
 C,Juan,Perez,C,23-25666777-9
 A,Alem,1122,CABA,1001,CABA'! !
+
+
+!ImportTest methodsFor: 'tests' stamp: 'MYB 6/23/2022 19:12:19'!
+test01ValidDataIsImportedCorrectly
+
+	CustomerImporter valueFrom: self validImportData into: session.
+
+	self 
+		assertImportedRightNumberOfCustomers;
+		assertPepeSanchezWasImportedCorrecty;
+		assertJuanPerezWasImportedCorrectly.! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:32:26'!
+test02CustomerRecordMustBeOnlyC
+
+	self
+		importingFrom: self invalidCustomerRecordWrongType
+		shouldRaiseErrorWithMessage: CustomerImporter invalidRecordTypeErrorDescription
+		andAssert: [ self assertNoCustomerHasBeenImported. ].! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:45:47'!
+test03AddressRecordMustBeOnlyA
+
+	self
+		importingFrom: self invalidAddressRecordWrongType
+		shouldRaiseErrorWithMessage: CustomerImporter invalidRecordTypeErrorDescription
+		andAssert: [
+			self assertOnlyOneCustomerHasBeenImported.
+			self assertNoAddressHasBeenImported.
+		].! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:41:37'!
+test04AddressRecordMustHasPreviousCustomerRecord
+
+	self
+		importingFrom: self invalidAddressRecordWithoutPreviousCustomerRecord
+		shouldRaiseErrorWithMessage: CustomerImporter addressRecordMustHavePreviousCustomerRecordErrorDescription
+		andAssert: [ self assertNoAddressHasBeenImported. ].! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:34:59'!
+test05CustomerRecordMustNotHaveLessThanFiveFields
+
+	self
+		importingFrom: self invalidCustomerRecordWithLessThanFiveFields
+		shouldRaiseErrorWithMessage: CustomerImporter customerRecordInvalidQuantityOfFieldsErrorDescription
+		andAssert: [ self assertNoCustomerHasBeenImported. ].! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:35:55'!
+test06CustomerRecordMustNotHaveMoreThanFiveFields
+
+	self
+		importingFrom: self invalidCustomerRecordWithMoreThanFiveFields
+		shouldRaiseErrorWithMessage: CustomerImporter customerRecordInvalidQuantityOfFieldsErrorDescription
+		andAssert: [ self assertNoCustomerHasBeenImported. ].! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:36:30'!
+test07AddressRecordMustNotHaveLessThanSixFields
+
+	self
+		importingFrom: self invalidAddressRecordWithLessThanSixFields
+		shouldRaiseErrorWithMessage: CustomerImporter addressRecordInvalidQuantityOfFieldsErrorDescription
+		andAssert: [ self assertNoAddressHasBeenImported. ].! !
+
+!ImportTest methodsFor: 'tests' stamp: 'id 6/26/2022 21:37:04'!
+test08AddressRecordMustNotHaveMoreThanSixFields
+
+	self
+		importingFrom: self invalidAddressRecordWithMoreThanSixFields
+		shouldRaiseErrorWithMessage: CustomerImporter addressRecordInvalidQuantityOfFieldsErrorDescription
+		andAssert: [ self assertNoAddressHasBeenImported. ].! !
 
 
 !classDefinition: #Address category: 'CustomerImporter'!
